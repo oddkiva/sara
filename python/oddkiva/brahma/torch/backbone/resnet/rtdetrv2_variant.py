@@ -56,7 +56,7 @@ class ResidualBottleneckBlock(nn.Module):
         stride: int = 1,
         activation: str = "relu",
         make_convolutional_shortcut: bool = False,
-        inplace_activation: bool = False
+        inplace_activation: bool = True
     ):
         """
         Constructs the residual bottleneck block variant used in RT-DETR v2.

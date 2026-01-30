@@ -6,7 +6,6 @@ from loguru import logger
 
 import torch
 import torchvision.transforms.v2 as v2
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
@@ -15,18 +14,19 @@ from torch.utils.tensorboard import SummaryWriter
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 # Parallelization
-from oddkiva.brahma.torch.parallel.ddp import (
-    torchrun_is_running,
-    wrap_model_with_ddp_if_needed
-)
+from oddkiva.brahma.torch.parallel.ddp import torchrun_is_running
 # Data Transforms
-from oddkiva.brahma.torch.object_detection.common.data_transforms import (
-    ToNormalizedCXCYWHBoxes,
-    FromRgb8ToRgb32f
-)
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction,
     collate_fn
+)
+from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    FromRgb8ToRgb32f,
+    RandomIoUCrop,
+    ToNormalizedCXCYWHBoxes
+)
+from oddkiva.brahma.torch.object_detection.common.mosaic import (
+    Mosaic
 )
 # Models
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -40,20 +40,33 @@ from oddkiva.brahma.torch.utils.logging import format_msg
 class ModelConfig:
 
     @staticmethod
-    def make_model() -> torch.nn.Module | DDP:
+    def make_model() -> torch.nn.Module:
         config = RTDETRConfig()
         model = RTDETRv2(config)
-        return wrap_model_with_ddp_if_needed(model)
+        return model
 
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 5
+    train_batch_size: int = 6
+    num_workers: int = 6
     val_batch_size: int = 32
-    num_workers: int = 4
 
     train_transform: v2.Transform = v2.Compose([
-        v2.RandomIoUCrop(),
+        Mosaic(
+            output_size=320,
+            rotation_range=10,
+            translation_range=(0.1, 0.1),
+            scaling_range=(0.5, 1.5),
+            probability=0.8,
+            fill_value=0,
+            use_cache=False,
+            max_cached_images=50,
+            random_pop=True
+        ),
+        v2.RandomPhotometricDistort(p=0.5),
+        v2.RandomZoomOut(fill=0, p=0.5),
+        RandomIoUCrop(p=0.5),
         v2.RandomHorizontalFlip(p=0.5),
         v2.Resize((640, 640)),
         v2.SanitizeBoundingBoxes(),
@@ -76,9 +89,9 @@ class TrainValTestDatasetConfig:
                 batch_size=TrainValTestDatasetConfig.train_batch_size,
                 collate_fn=RTDETRImageCollateFunction(),
                 # The following options are for parallel data training
-                shuffle=False,
-                sampler=DistributedSampler(ds),
+                sampler=DistributedSampler(ds, shuffle=True),
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
         else:
             return DataLoader(
@@ -86,7 +99,8 @@ class TrainValTestDatasetConfig:
                 shuffle=True,
                 batch_size=TrainValTestDatasetConfig.train_batch_size,
                 collate_fn=RTDETRImageCollateFunction(),
-                num_workers=TrainValTestDatasetConfig.num_workers
+                num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
 
     @staticmethod
@@ -100,6 +114,7 @@ class TrainValTestDatasetConfig:
                 shuffle=False,
                 sampler=DistributedSampler(ds),
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
         else:
             return DataLoader(
@@ -108,6 +123,7 @@ class TrainValTestDatasetConfig:
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
                 collate_fn=collate_fn,
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
 
     @staticmethod
@@ -136,6 +152,11 @@ class OptimizationConfig:
     learning_rate: float = 1e-4
     betas: tuple[float, float] = (0.9, 0.999)
     weight_decay: float = 0.0001
+
+    ema_decay: float = 0.9999
+    ema_warmup_steps: int = 2000
+
+    gradient_norm_max: float = 0.1
 
 
 class SummaryWriterConfig:

@@ -3,11 +3,30 @@
 from typing import Any
 
 import torch
-import torch.nn.functional as F
 
 import torchvision
 import torchvision.transforms.v2 as v2
 from torchvision.tv_tensors import BoundingBoxFormat, BoundingBoxes
+
+
+class RandomIoUCrop(v2.RandomIoUCrop):
+
+    def __init__(self,
+                 min_scale: float = 0.3,
+                 max_scale: float = 1,
+                 min_aspect_ratio: float = 0.5,
+                 max_aspect_ratio: float = 2,
+                 sampler_options: list[float] | None = None,
+                 trials: int = 40,
+                 p: float = 1.0):
+        super().__init__(min_scale, max_scale, min_aspect_ratio,
+                         max_aspect_ratio, sampler_options, trials)
+        self.p = p
+
+    def __call__(self, *inputs: Any) -> Any:
+        if torch.rand(1) >= self.p:
+            return inputs if len(inputs) > 1 else inputs[0]
+        return super().forward(*inputs)
 
 
 class ToNormalizedCXCYWHBoxes(v2.Transform):

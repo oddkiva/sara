@@ -84,7 +84,7 @@ class BoxMatcher(torch.nn.Module):
             #
             # These impossible cases will be filtered out later, but we do this
             # because we try to avoid writing loops in Python.
-            tgt_class_probs = query_label_probs_flat[:, tgt_labels_flat]
+            tgt_label_probs_est = query_label_probs_flat[:, tgt_labels_flat]
 
             # The distance between query box `i` and target box `j` can be
             # measured in terms of the focal loss. There are 2 components in the
@@ -96,8 +96,8 @@ class BoxMatcher(torch.nn.Module):
             #
             # This value approaches 0 as the probability approaches 1.
             fl_pos_component = self.alpha * \
-                ((1 - tgt_class_probs) ** self.gamma) * \
-                (-torch.log(tgt_class_probs + self.eps))
+                ((1 - tgt_label_probs_est) ** self.gamma) * \
+                (-torch.log(tgt_label_probs_est + self.eps))
 
             # The negative part of the focal loss is the penalty score for NOT
             # labeling query box `i` to the same object class of target box
@@ -109,8 +109,8 @@ class BoxMatcher(torch.nn.Module):
             # In other words, the negative part of the focal loss is a
             # **similarity** score that shoots to `-infty`.
             fl_neg_component = (1 - self.alpha) * \
-                (tgt_class_probs ** self.gamma) * \
-                (-torch.log(1 - tgt_class_probs + self.eps))
+                (tgt_label_probs_est ** self.gamma) * \
+                (-torch.log(1 - tgt_label_probs_est + self.eps))
 
             # The composite labeling cost for is the difference.
             #

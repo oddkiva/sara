@@ -4,9 +4,12 @@ from loguru import logger
 
 import torch
 import torchvision.transforms.v2 as v2
-from torch.utils.data import DataLoader
 
 import oddkiva.brahma.torch.datasets.coco as coco
+from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    FromRgb8ToRgb32f,
+    ToNormalizedCXCYWHBoxes
+)
 from oddkiva.brahma.torch.object_detection.common.mosaic import (
     Mosaic
 )
@@ -26,7 +29,9 @@ def get_coco_val_dataset():
             random_pop=True
         ),
         v2.Resize((640, 640)),
-        v2.SanitizeBoundingBoxes()
+        v2.SanitizeBoundingBoxes(),
+        ToNormalizedCXCYWHBoxes(),
+        FromRgb8ToRgb32f()
     ])
     ds = coco.COCOObjectDetectionDataset(
         train_or_val='val',
@@ -40,12 +45,13 @@ def get_coco_val_dataset():
 def test_mosaic():
     ds = get_coco_val_dataset()
 
-    print(ds[0])
+    img, boxes, labels = ds[0]
 
-    # logger.info(f"Instantiating COCO dataloader...")
-    # dl = DataLoader(
-    #     dataset=ds,
-    #     batch_size=16,
-    #     shuffle=False,
-    #     collate_fn=collate_fn
-    # )
+    # Some basic checks.
+    assert img.shape == (3, 640, 640)
+    assert img.dtype == torch.float32
+    assert (0 <= img).all().item() is True and (img <= 1).all().item() is True
+    assert len(boxes) == len(labels)
+
+    # Check that the boxes don't have crazily small coordinates.
+    assert ((boxes * 640).mean(0) > 20.).all().item() is True

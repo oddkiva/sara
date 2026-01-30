@@ -53,7 +53,7 @@ class ConvBNA(nn.Module):
         activation: str | None,
         id: int | None = None,
         bias: bool = True,
-        inplace_activation: bool = False,
+        inplace_activation: bool = True,
         freeze_batch_norm: bool = False
     ):
         super(ConvBNA, self).__init__()

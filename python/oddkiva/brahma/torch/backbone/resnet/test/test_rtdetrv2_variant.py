@@ -20,6 +20,26 @@ CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
 DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                  'rtdetrv2_r50vd_6x_coco_ema.data.pt')
 
+
+def test_rtdetrv2_resnet50_inplace_activation():
+    model = ResNet50RTDETRV2Variant()
+
+    def list_activation_layers(module: torch.nn.Module,
+                               activations: list[torch.nn.Module]):
+        # DFS visit.
+        for child_tree_name, child_tree in module.named_children():
+            if 'activation' in child_tree_name:
+                # the child tree is a node.
+                activations.append((child_tree_name, child_tree))
+            else:
+                list_activation_layers(child_tree, activations)
+
+    activations = []
+    list_activation_layers(model, activations)
+
+    assert all([module.inplace for _, module in activations])
+
+
 def test_rtdetrv2_resnet50_variant_construction():
     data = torch.load(DATA_FILEPATH)
 

@@ -140,5 +140,5 @@ class RTDETRConfig:
     assert encoder.encoding_dim == query_selector.encoding_dim
     assert query_selector.hidden_dim == decoder.hidden_dim
 
-    def setup_for_inference(self, inference: bool) -> None:
-        self.query_selector.precalculate_anchor_geometry_logits = True
+    def setup_for_inference(self, inference: bool = True) -> None:
+        self.query_selector.precalculate_anchor_geometry_logits = inference

@@ -43,6 +43,7 @@ class ModelConfig:
     H_INFER = 640
 
     RUN_ON_CPU = False
+    CONFIDENCE_THRESHOLD = 0.2
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -55,8 +56,11 @@ class ModelConfig:
         else:
             device = torch.device(DEFAULT_DEVICE)
 
-        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_2_step_2000.pth'
-        assert ckpt_fp.exists()
+        EPOCH = 2
+        STEPS = 9000
+        CKPT_FP = (ModelConfig.CKPT_DIRPATH /
+                   f'ckpt_epoch_{EPOCH}_step_{STEPS}.pth')
+        assert CKPT_FP.exists()
 
         # THE MODEL
         config = RTDETRConfig()
@@ -64,7 +68,7 @@ class ModelConfig:
         model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
-        ckpt = torch.load(ckpt_fp, weights_only=True, map_location=device)
+        ckpt = torch.load(CKPT_FP, weights_only=True, map_location=device)
         model.load_state_dict(ckpt)
 
         model = freeze_batch_norm(model)
@@ -120,9 +124,6 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
     labels = labels.cpu().numpy()
     confidences = confidences.cpu().numpy()
 
-    print('labels', labels)
-    print('confidences', confidences)
-
     return (lefts, tops, widths, heights, labels, confidences)
 
 
@@ -160,7 +161,7 @@ def user_main():
             print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.1:
+                if conf < ModelConfig.CONFIDENCE_THRESHOLD:
                     continue
 
                 # Draw the object box

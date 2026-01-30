@@ -1,6 +1,8 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+import argparse
 import atexit
+
 from loguru import logger
 
 import torch
@@ -16,7 +18,8 @@ from oddkiva.brahma.torch.utils.logging import format_msg
 from oddkiva.brahma.torch.parallel.ddp import (
     ddp_setup,
     get_local_rank,
-    torchrun_is_running
+    torchrun_is_running,
+    wrap_model_with_ddp_if_needed
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures\
     .rt_detr.hungarian_loss import (
@@ -126,7 +129,8 @@ def train_for_one_epoch(
     ema: ModelEMA,
     writer: SummaryWriter,
     summary_write_interval: int,
-    epoch: int
+    epoch: int,
+    max_norm: float | None
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -169,6 +173,8 @@ def train_for_one_epoch(
 
         logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
         loss.backward()
+        if max_norm is not None:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
 
         # AdamW and EMA should be used together.
         optimizer.step()
@@ -181,8 +187,7 @@ def train_for_one_epoch(
 
             loss_value = loss
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-            writer.add_scalar(f'global',
-                              loss_value, train_global_step)
+            writer.add_scalar(f'global', loss_value, train_global_step)
 
         train_global_step += 1
 
@@ -190,31 +195,59 @@ def train_for_one_epoch(
             save_model(model, epoch, step)
 
 
-def main():
+def main(args):
     # PARALLEL TRAINING
     ddp_setup()
 
-    # THE DATASET
-    train_ds, val_ds, _ = PipelineConfig.make_datasets()
-    summary_writer = PipelineConfig.make_summary_writer()
-
+    # --------------------------------------------------------------------------
     # THE MODEL
     gpu_id = get_local_rank()
     rtdetrv2_model = PipelineConfig.make_model()
+    # Load the model weights.
+    ckpt_fp = args.resume
+    if ckpt_fp is not None:
+        logger.info(format_msg(
+            f"Loading model weights from checkpoint: {ckpt_fp}"
+        ))
+        ckpt = torch.load(ckpt_fp, map_location='cpu')
+        rtdetrv2_model.load_state_dict(ckpt)
+    # Transfer the model to GPU memory and wrap it as a DDP model.
+    rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
+    torch.distributed.barrier()
 
+
+    # --------------------------------------------------------------------------
     # THE LOSS FUNCTION
-    alpha = 0.2
-    gamma = 2.0
-    matching_cost_weights = {
-        'class': 2.0,
-        'l1': 5.0,
-        'giou': 2.0
+    classification_loss_params = {
+        # The alpha parameter is a parameter of the **VARIFOCAL** loss.
+        # It is large and should gives a very strong emphasis on minimizing
+        # false positives...
+        'alpha': 0.75,
+        'gamma': 2.0
     }
-    hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha,
-                                            gamma=gamma,
-                                            weights=matching_cost_weights)
+    box_matcher_params = {
+        # The alpha parameter is a parameter of the **FOCAL** loss.
+        #
+        # It gives less emphasis on the cost incurred in the positive
+        # part of the focal loss. The negative part of the focal loss has more
+        # importance.
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    hungarian_loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+    )
 
-    # THE WEIGHTED SUM OF ELEMENTARY LOSSES.
+    # --------------------------------------------------------------------------
+    # THE COMPOUND LOSS FUNCTION
+    #
+    # The weights of each elementary losses.
     loss_weights = {
         'vf': 1.0,
         'l1': 5.0,
@@ -222,27 +255,17 @@ def main():
     }
     loss_reducer = HungarianLossReducer(loss_weights)
 
+
+    # --------------------------------------------------------------------------
     # THE OPTIMIZER.
     #
-    # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
-    #
-    # Build param_group where each group consists of a single parameter.
-    # `param_group_names` is created so we can keep track of which param_group
-    # corresponds to which parameter.
-    #
-    # param_groups = []
-    # param_group_names = []
-    # for name, parameter in model.named_parameters():
-    #     param_groups.append({
-    #         'params': [parameter],
-    #         'lr': learning_rates[name]
-    #     })
-    #     param_group_names.append(name)
-    #
-    # optimizer requires default learning rate even if its overridden by all
-    # param groups
-    # optimizer = optim.AdamW(param_groups, lr=...)
-    adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
+    # The parameter groups with specific learning parameters.
+    rtdetrv2_param_groups = rtdetrv2_model.module.group_learnable_parameters()
+    # We learn from scratch: let's be very aggressive.
+    backbone_pg = rtdetrv2_param_groups[0]
+    backbone_pg['lr'] = 5e-5
+    # The optimizer.
+    adamw = torch.optim.AdamW(rtdetrv2_param_groups,
                               lr=PipelineConfig.learning_rate,
                               betas=PipelineConfig.betas,
                               weight_decay=PipelineConfig.weight_decay)
@@ -253,7 +276,16 @@ def main():
         gamma=0.1
     )
 
-    ema = ModelEMA(rtdetrv2_model, decay=0.9999, warmups=2000)
+    ema = ModelEMA(rtdetrv2_model,
+                   decay=PipelineConfig.ema_decay,
+                   warmups=PipelineConfig.ema_warmup_steps)
+
+
+    # --------------------------------------------------------------------------
+    # THE DATA.
+    train_ds, val_ds, _ = PipelineConfig.make_datasets()
+    summary_writer = PipelineConfig.make_summary_writer()
+
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
@@ -279,7 +311,8 @@ def main():
                             ema,
                             summary_writer,
                             PipelineConfig.write_interval,
-                            epoch)
+                            epoch,
+                            PipelineConfig.gradient_norm_max)
 
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()
@@ -299,4 +332,24 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-r', '--resume',
+        type=str,
+        help='Resume from checkpoint'
+    )
+    parser.add_argument(
+        '-b', '--backbone',
+        type=str,
+        help=("Load the backbone weights from the public checkpoint provided "
+              "by RT-DETR's authors.")
+    )
+    args = parser.parse_args()
+
+    if args.resume and args.backbone:
+        print(("ERROR: choose either to resume from an existing checkpoint or "
+               "to load the backbone weights"))
+        exit()
+
+    main(args)
