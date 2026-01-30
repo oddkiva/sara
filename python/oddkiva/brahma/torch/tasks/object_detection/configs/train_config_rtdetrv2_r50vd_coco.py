@@ -89,6 +89,7 @@ class TrainValTestDatasetConfig:
                 # The following options are for parallel data training
                 sampler=DistributedSampler(ds, shuffle=True),
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
         else:
             return DataLoader(
@@ -96,7 +97,8 @@ class TrainValTestDatasetConfig:
                 shuffle=True,
                 batch_size=TrainValTestDatasetConfig.train_batch_size,
                 collate_fn=RTDETRImageCollateFunction(),
-                num_workers=TrainValTestDatasetConfig.num_workers
+                num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
 
     @staticmethod
@@ -110,6 +112,7 @@ class TrainValTestDatasetConfig:
                 shuffle=False,
                 sampler=DistributedSampler(ds),
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
         else:
             return DataLoader(
@@ -118,6 +121,7 @@ class TrainValTestDatasetConfig:
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
                 collate_fn=collate_fn,
                 num_workers=TrainValTestDatasetConfig.num_workers,
+                pin_memory=True
             )
 
     @staticmethod

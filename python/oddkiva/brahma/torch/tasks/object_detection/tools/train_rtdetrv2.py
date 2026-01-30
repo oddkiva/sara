@@ -220,13 +220,19 @@ def main(args):
     # --------------------------------------------------------------------------
     # THE LOSS FUNCTION
     classification_loss_params = {
-        # The alpha parameter of the varifocal loss is large and should gives a
-        # very strong emphasis on minimizing false positives...
+        # The alpha parameter is a parameter of the **VARIFOCAL** loss.
+        # It is large and should gives a very strong emphasis on minimizing
+        # false positives...
         'alpha': 0.75,
         'gamma': 2.0
     }
     box_matcher_params = {
-        'alpha': 0.25,  # This should encourage minimizing false positives too.
+        # The alpha parameter is a parameter of the **FOCAL** loss.
+        #
+        # It gives less emphasis on the cost incurred in the positive
+        # part of the focal loss. The negative part of the focal loss has more
+        # importance.
+        'alpha': 0.25,
         'gamma': 2.0,
         'cost_matrix_weights': {
             'class': 2.0,
