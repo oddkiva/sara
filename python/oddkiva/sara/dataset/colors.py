@@ -5,11 +5,14 @@ import numpy as np
 
 def generate_label_colors(
     label_count: int,
-    colormap: str = 'rainbow'
 ) -> np.ndarray:
-    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
 
-    cmap = plt.get_cmap(colormap)
-    colors = cmap(np.linspace(0, 1, label_count))
-    colors = (colors[:, :3] * 255).astype(np.int32)
+    colors = np.array([
+        mcolors.hex2color(c)
+        for _, c in mcolors.CSS4_COLORS.items()
+    ])
+    colors = (colors * 255).astype(np.int32)
+    colors = colors[:label_count]
+
     return colors

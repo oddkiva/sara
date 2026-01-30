@@ -43,7 +43,7 @@ class ModelConfig:
     H_INFER = 640
 
     RUN_ON_CPU = False
-    CONFIDENCE_THRESHOLD = 0.2
+    CONFIDENCE_THRESHOLD = 0.3
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -56,7 +56,7 @@ class ModelConfig:
         else:
             device = torch.device(DEFAULT_DEVICE)
 
-        EPOCH = 2
+        EPOCH = 0
         STEPS = 9000
         CKPT_FP = (ModelConfig.CKPT_DIRPATH /
                    f'ckpt_epoch_{EPOCH}_step_{STEPS}.pth')
@@ -172,7 +172,7 @@ def user_main():
 
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
-                text = label_names[label]
+                text = f'{label_names[label]} {conf:0.2f}'
                 font_size = 12
                 bold = True
 
