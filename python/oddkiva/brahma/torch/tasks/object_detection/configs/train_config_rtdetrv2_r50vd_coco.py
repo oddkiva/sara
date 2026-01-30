@@ -6,7 +6,6 @@ from loguru import logger
 
 import torch
 import torchvision.transforms.v2 as v2
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
@@ -22,8 +21,9 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import (
     collate_fn
 )
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
-    ToNormalizedCXCYWHBoxes,
-    FromRgb8ToRgb32f
+    FromRgb8ToRgb32f,
+    RandomIoUCrop,
+    ToNormalizedCXCYWHBoxes
 )
 from oddkiva.brahma.torch.object_detection.common.mosaic import (
     Mosaic
@@ -48,9 +48,9 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 5
+    train_batch_size: int = 6
+    num_workers: int = 6
     val_batch_size: int = 32
-    num_workers: int = 4
 
     train_transform: v2.Transform = v2.Compose([
         Mosaic(
@@ -64,7 +64,9 @@ class TrainValTestDatasetConfig:
             max_cached_images=50,
             random_pop=True
         ),
-        v2.RandomIoUCrop(),
+        v2.RandomPhotometricDistort(p=0.5),
+        v2.RandomZoomOut(fill=0, p=0.5),
+        RandomIoUCrop(p=0.5),
         v2.RandomHorizontalFlip(p=0.5),
         v2.Resize((640, 640)),
         v2.SanitizeBoundingBoxes(),

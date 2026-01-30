@@ -1,37 +1,42 @@
+import torch
+
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 
 
-# def test_model_parameter_count():
-#     # THE DATA
-#     device = torch.device(DEFAULT_DEVICE)
-#
-#     # THE MODEL
-#     config = RTDETRConfig()
-#     model = RTDETRv2(config).to(device)
-#     model = freeze_batch_norm(model)
-#
-#     backbone = model.backbone
-#     bparams = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
-#     print(bparams)
-#     # ME      : 23474016
-#     # ORIGINAL: 23445504
-#
-#
-#     #' params = sum(
-#     #'     param.numel()
-#     #'     for param in model.parameters()
-#     #'     if param.requires_grad
-#     #' )
-#     #' print(params)
-#     #' print(params)
-#     #' print(params)
-#     #' print(params)
-#     #' # It shows: 43863652
-#
-#     #' # TODO: Find out Number of trainable parameters: 42862860
+def test_model_parameter_count():
+    # THE DATA
+    device = torch.device(DEFAULT_DEVICE)
+
+    # THE MODEL
+    config = RTDETRConfig()
+    model = RTDETRv2(config).to(device)
+    model = freeze_batch_norm(model)
+
+    backbone = model.backbone
+    bparams = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
+    print(bparams)
+    # ME      : 23474016
+    # ORIGINAL: 23445504
+
+
+    params = sum(
+        param.numel()
+        for param in model.parameters()
+        if param.requires_grad
+    )
+    print(params)
+    print(params)
+    print(params)
+    print(params)
+    # It shows: 43863652
+    # TODO: Find out why the number of trainable parameters: 42862860
+    #
+    # import ipdb; ipdb.set_trace()
 
 
 def test_model_parameters():

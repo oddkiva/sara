@@ -13,7 +13,11 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction
 )
 # Data augmentation.
+from oddkiva.brahma.torch.object_detection.common.mosaic import (
+    Mosaic
+)
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    RandomIoUCrop,
     ToNormalizedCXCYWHBoxes,
     FromRgb8ToRgb32f
 )
@@ -49,7 +53,20 @@ DEVICE = DEFAULT_DEVICE if DEFAULT_DEVICE != 'mps' else 'cpu'
 def get_coco_val_dl():
     logger.info(f"Instantiating COCO dataset...")
     transform = v2.Compose([
-        v2.RandomIoUCrop(),
+        Mosaic(
+            output_size=320,
+            rotation_range=10,
+            translation_range=(0.1, 0.1),
+            scaling_range=(0.5, 1.5),
+            probability=1.0,
+            fill_value=0,
+            use_cache=False,
+            max_cached_images=50,
+            random_pop=True
+        ),
+        v2.RandomPhotometricDistort(p=0.5),
+        v2.RandomZoomOut(fill=0, p=0.5),
+        RandomIoUCrop(p=0.5),
         v2.RandomHorizontalFlip(p=0.5),
         v2.Resize((640, 640)),
         v2.SanitizeBoundingBoxes(),
@@ -66,8 +83,9 @@ def get_coco_val_dl():
     coco_dl = DataLoader(
         dataset=coco_ds,
         batch_size=4,
-        shuffle=False,
-        collate_fn=RTDETRImageCollateFunction()
+        shuffle=True,
+        collate_fn=RTDETRImageCollateFunction(),
+        pin_memory=True
     )
 
     return coco_dl
