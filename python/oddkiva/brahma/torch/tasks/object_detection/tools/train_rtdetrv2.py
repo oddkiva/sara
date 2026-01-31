@@ -2,6 +2,7 @@
 
 import argparse
 import atexit
+import subprocess
 
 from loguru import logger
 
@@ -14,6 +15,10 @@ from torch.distributed import (
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from oddkiva.brahma.torch.utils.freeze import (
+    freeze_batch_norm,
+    freeze_parameters
+)
 from oddkiva.brahma.torch.utils.logging import format_msg
 from oddkiva.brahma.torch.parallel.ddp import (
     ddp_setup,
@@ -32,6 +37,19 @@ from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
         TrainTestPipelineConfig as PipelineConfig
     )
+
+
+def get_gpu_memory_usage():
+    result = subprocess.run(
+        ['nvidia-smi',
+         '--query-gpu=memory.used',
+         '--format=csv,noheader'],
+        stdout=subprocess.PIPE
+    )
+    mb_used = result.stdout.decode('utf-8').strip().split('\n')
+    mb_used = [f'[GPU:{id}] {mb}' for id, mb in enumerate(mb_used)]
+    mb_used = "\n".join(mb_used)
+    return mb_used
 
 
 # --------------------------------------------------------------------------
@@ -130,19 +148,25 @@ def train_for_one_epoch(
     writer: SummaryWriter,
     summary_write_interval: int,
     epoch: int,
-    max_norm: float | None
+    max_norm: float | None,
+    debug: bool = False
 ) -> None:
-    torch.autograd.set_detect_anomaly(True)
+    if debug:
+        torch.autograd.set_detect_anomaly(True)
 
     model.train()
 
     for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
-        optimizer.zero_grad()
+        # Optimize the GPU memory consumption as per the documentation.
+        optimizer.zero_grad(set_to_none=True)
 
         if gpu_id is not None:
             imgs = imgs.to(gpu_id)
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Batch size: {imgs.shape[0]}'
+        ))
 
         logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'))
         targets = {
@@ -153,9 +177,7 @@ def train_for_one_epoch(
             imgs, targets
         )
 
-        (anchor_geometry_logits,
-         anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
-        anchor_boxes = F.sigmoid(anchor_geometry_logits)
+        anchor_boxes, anchor_class_logits = aux_train_outputs['anchors']
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
@@ -185,9 +207,14 @@ def train_for_one_epoch(
 
             log_elementary_losses(loss_dict, writer, train_global_step)
 
-            loss_value = loss
+            loss_value = loss.detach()
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
             writer.add_scalar(f'global', loss_value, train_global_step)
+
+            logger.info(format_msg((
+                f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
+                f'{get_gpu_memory_usage()}'
+            )))
 
         train_global_step += 1
 
@@ -210,7 +237,32 @@ def main(args):
             f"Loading model weights from checkpoint: {ckpt_fp}"
         ))
         ckpt = torch.load(ckpt_fp, map_location='cpu')
+
+        # NOTE:
+        # Clean up the checkpoint file as we fixed the implementation of the
+        # transformer decoder recently.
+        ckpt = {
+            k: v
+            for k, v in ckpt.items()
+            if (not k.startswith('decoder.decoder_class_logits_head') and
+                not k.startswith('decoder.decoder_box_geometry_head'))
+        }
+
         rtdetrv2_model.load_state_dict(ckpt)
+
+        # NOTE:
+        # In later epochs, we can freeze the parameters of:
+        # - the first block of the backbone
+        # - the batch norm layers of the backbone
+        # This enables to free up a lot of GPU memory and increase the batch
+        # size from 5 to 8.
+        #
+        # This is what RT-DETR's original implementation does and it can afford
+        # to do that as it starts from a pretrained backbone.
+        freeze_batch_norm(rtdetrv2_model.backbone)
+        freeze_parameters(rtdetrv2_model.backbone.blocks[0])
+
+
     # Transfer the model to GPU memory and wrap it as a DDP model.
     rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
     torch.distributed.barrier()

@@ -23,7 +23,10 @@ class MultiLayerPerceptron(nn.Module):
             nn.Linear(in_channels, out_channels)
             for in_channels, out_channels in zip(in_dim_seq, out_dim_seq)
         )
-        self.activation = make_activation_func(activation)
+        self.activation = make_activation_func(
+            activation,
+            inplace=True  # NOTE: important as we need to save GPU memory.
+        )
         assert self.activation is not None
 
 

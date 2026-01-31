@@ -8,7 +8,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 
 
-def test_model_parameter_count():
+def test_parameter_count():
     # THE DATA
     device = torch.device(DEFAULT_DEVICE)
 
@@ -17,26 +17,16 @@ def test_model_parameter_count():
     model = RTDETRv2(config).to(device)
     model = freeze_batch_norm(model)
 
+    # The original RT-DETR v2 freezes the first blocks of convolutional
+    # parameters (see the config YAML file (`PResNet`, `freeze_at: 0`).
     backbone = model.backbone
-    bparams = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
-    print(bparams)
-    # ME      : 23474016
-    # ORIGINAL: 23445504
-
-
-    params = sum(
-        param.numel()
-        for param in model.parameters()
-        if param.requires_grad
-    )
-    print(params)
-    print(params)
-    print(params)
-    print(params)
-    # It shows: 43863652
-    # TODO: Find out why the number of trainable parameters: 42862860
-    #
-    # import ipdb; ipdb.set_trace()
+    num_blocks = len(backbone.blocks)
+    b_param_count = sum([
+        p.numel()
+        for i in range(1, num_blocks) for p in backbone.blocks[i].parameters()
+        if p.requires_grad
+    ])
+    assert b_param_count == 23445504
 
 
 def test_model_parameters():

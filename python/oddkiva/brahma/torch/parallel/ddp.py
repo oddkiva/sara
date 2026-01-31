@@ -43,9 +43,7 @@ def wrap_model_with_ddp_if_needed(
             monogpu_model
         )
         # 3. Wrap the model
-        model = DDP(monogpu_model,
-                    device_ids=[gpu_id],
-                    find_unused_parameters=True)
+        model = DDP(monogpu_model, device_ids=[gpu_id])
         return model
     else:
         return monogpu_model

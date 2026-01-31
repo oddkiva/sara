@@ -43,7 +43,7 @@ class ModelConfig:
     H_INFER = 640
 
     RUN_ON_CPU = False
-    CONFIDENCE_THRESHOLD = 0.2
+    CONFIDENCE_THRESHOLD = 0.25
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -54,10 +54,10 @@ class ModelConfig:
         if ModelConfig.RUN_ON_CPU:
             device = torch.device('cpu')
         else:
-            device = torch.device(DEFAULT_DEVICE)
+            device = torch.device('cuda:1')
 
-        EPOCH = 2
-        STEPS = 9000
+        EPOCH = 0
+        STEPS = 2000
         CKPT_FP = (ModelConfig.CKPT_DIRPATH /
                    f'ckpt_epoch_{EPOCH}_step_{STEPS}.pth')
         assert CKPT_FP.exists()
@@ -172,11 +172,11 @@ def user_main():
 
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
-                text = label_names[label]
+                text = f'{label_names[label]} {conf:0.2f}'
                 font_size = 12
                 bold = True
 
-                print(f'[conf:{conf:.2f}] drawing [object:{text}] at [{l}, {t}, {w}, {h}]')
+                print(f'[{text}] ({l}, {t}, {w}, {h})')
 
                 image_draw.draw_text(display_frame, p, text, color,
                                      font_size, 0, False, bold, False)
@@ -186,4 +186,3 @@ def user_main():
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
-

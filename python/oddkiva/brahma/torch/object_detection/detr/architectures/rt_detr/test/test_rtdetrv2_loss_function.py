@@ -175,20 +175,17 @@ def test_rtdetrv2_backpropagation_from_anchors():
     assert loss_fn.matcher.w_box_giou == cost_matrix_weights['giou']
 
     # Calculate the loss only for the predicted anchor boxes.
-    (anchor_geometry_logits,
-     anchor_class_logits) = other_train_outputs['top_k_anchor_boxes']
-    anchor_geometries = F.sigmoid(anchor_geometry_logits)
+    anchor_boxes, anchor_class_logits = other_train_outputs['anchors']
 
     # The Hungarian loss.
     #
     # 1. Calculate the matching for the anchor boxes.
     matching_a = loss_fn.matcher.forward(
-        anchor_class_logits, anchor_geometries,
+        anchor_class_logits, anchor_boxes,
         tgt_labels, tgt_boxes
     )
     # 2. Calculate the loss value for anchor boxes based on the matching.
-    loss_dict = loss_fn.compute_loss_dict(anchor_geometries,
-                                          anchor_class_logits,
+    loss_dict = loss_fn.compute_loss_dict(anchor_boxes, anchor_class_logits,
                                           tgt_boxes, tgt_labels,
                                           matching_a, tgt_count)
     loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
@@ -252,7 +249,7 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
         'boxes': tgt_boxes,
         'labels': tgt_labels
     }
-    box_geoms, box_class_logits, aux_train_outs = rtdetrv2.forward(
+    _, _, aux_train_outs = rtdetrv2.forward(
         x, targets
     )
 
@@ -365,7 +362,7 @@ def test_rtdetrv2_backpropagation_from_final_queries():
 
 
     logger.info(f"Tracking RT-DETR v2 gradients...")
-    layers, grads = track_all_layer_gradients(rtdetrv2, hook_forward, hook_backward)
+    _, grads = track_all_layer_gradients(rtdetrv2, hook_forward, hook_backward)
 
 
     # Obtain the first training sample.
@@ -550,9 +547,7 @@ def test_hungarian_loss_api():
     assert loss_fn.matcher.w_box_l1 == 5.0
     assert loss_fn.matcher.w_box_giou == 2.0
 
-    (anchor_geometry_logits,
-     anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
-    anchor_boxes = F.sigmoid(anchor_geometry_logits)
+    anchor_boxes, anchor_class_logits = aux_train_outputs['anchors']
     dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
     dn_groups = aux_train_outputs['dn_groups']
 

@@ -2,6 +2,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
@@ -37,9 +38,9 @@ class RTDETRv2(nn.Module):
         )
 
         # Top-K anchor selection.
-        (top_queries,
-         top_class_logits,
-         top_geometry_logits,
+        (top_anchor_queries,
+         top_anchor_class_logits,
+         top_anchor_geometry_logits,
          memory) = self.query_selector.forward(encoding_pyramid)
 
         # The value and its original feature pyramid shapes.
@@ -56,11 +57,13 @@ class RTDETRv2(nn.Module):
         (detection_boxes, detection_class_logits,
          dn_boxes, dn_class_logits,
          dn_groups) = self.decoder.forward(
-             top_queries.detach(), top_geometry_logits.detach(),
+             top_anchor_queries.detach(), top_anchor_geometry_logits.detach(),
              value, value_pyramid_hw_sizes,
              value_mask=value_mask,
              targets=targets
          )
+
+        top_anchor_geometries = F.sigmoid(top_anchor_geometry_logits)
 
         aux_train_outputs = {
             # To optimize:
@@ -68,7 +71,7 @@ class RTDETRv2(nn.Module):
             # - AIFI+CCFF hybrid encoder,
             # - anchor decoder inside the self.query_selector
             # The following outputs are used as feedback:
-            'top_k_anchor_boxes': (top_geometry_logits, top_class_logits),
+            'anchors': (top_anchor_geometries, top_anchor_class_logits),
 
             # Denoising groups to accelerate the training convergence.
             'dn_boxes': (dn_boxes, dn_class_logits),
