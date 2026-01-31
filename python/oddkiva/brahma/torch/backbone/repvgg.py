@@ -40,7 +40,7 @@ class RepVggBlock(torch.nn.Module):
                  stride: int = 2,
                  use_identity_connection: bool = False,
                  activation: str = 'relu',
-                 inplace_activation: bool = False):
+                 inplace_activation: bool = True):
         r"""Constructs a RegVggBlock.
 
         The current parameters should be enough to accommodate:

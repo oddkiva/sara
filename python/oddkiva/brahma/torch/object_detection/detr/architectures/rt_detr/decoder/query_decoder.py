@@ -147,7 +147,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
 
         self.feedforward = nn.Sequential(OrderedDict([
             ("linear1", nn.Linear(embed_dim, feedforward_dim)),
-            ("activation", nn.ReLU()),
+            ("activation", nn.ReLU(inplace=True)),
             ("dropout", nn.Dropout(p=dropout)),
             ("linear2", nn.Linear(feedforward_dim, embed_dim))
         ]))
