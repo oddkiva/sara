@@ -40,7 +40,7 @@ from oddkiva.brahma.torch.utils.logging import format_msg
 class ModelConfig:
 
     @staticmethod
-    def make_model() -> torch.nn.Module:
+    def make_model() -> RTDETRv2:
         config = RTDETRConfig()
         model = RTDETRv2(config)
         return model
@@ -48,8 +48,8 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 6
-    num_workers: int = 6
+    train_batch_size: int = 8
+    num_workers: int = 8
     val_batch_size: int = 32
 
     train_transform: v2.Transform = v2.Compose([
