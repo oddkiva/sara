@@ -307,19 +307,6 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         ])
 
-        # These two heads are mainly there to accelerate the training
-        # convergence
-        #
-        # Query class logits
-        self.decoder_class_logits_head = nn.ModuleList(
-            nn.Linear(hidden_dim, num_classes) for _ in range(attn_num_layers)
-        )
-        # Query geometry logits
-        self.decoder_box_geometry_head = nn.ModuleList(
-            MultiLayerPerceptron(hidden_dim, hidden_dim, 4, 3)
-            for _ in range(attn_num_layers)
-        )
-
         # ---------------------------------------------------------------------
         # OBJECT QUERY RE-EMBEDDING FUNCTIONS
         # ---------------------------------------------------------------------

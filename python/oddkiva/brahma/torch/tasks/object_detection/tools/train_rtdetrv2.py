@@ -215,6 +215,17 @@ def main(args):
             f"Loading model weights from checkpoint: {ckpt_fp}"
         ))
         ckpt = torch.load(ckpt_fp, map_location='cpu')
+
+        # NOTE:
+        # Clean up the checkpoint file as we fixed the implementation of the
+        # transformer decoder recently.
+        ckpt = {
+            k: v
+            for k, v in ckpt.items()
+            if (not k.startswith('decoder.decoder_class_logits_head') and
+                not k.startswith('decoder.decoder_box_geometry_head'))
+        }
+
         rtdetrv2_model.load_state_dict(ckpt)
     # Transfer the model to GPU memory and wrap it as a DDP model.
     rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
