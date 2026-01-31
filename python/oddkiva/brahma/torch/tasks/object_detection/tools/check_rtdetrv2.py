@@ -42,8 +42,10 @@ class ModelConfig:
     W_INFER = 640
     H_INFER = 640
 
-    RUN_ON_CPU = False
-    CONFIDENCE_THRESHOLD = 0.25
+    RUN_ON_CPU = True
+    EPOCH = 0
+    STEPS = 4000
+    CONFIDENCE_THRESHOLD = 0.45
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -56,10 +58,10 @@ class ModelConfig:
         else:
             device = torch.device('cuda:1')
 
-        EPOCH = 0
-        STEPS = 2000
-        CKPT_FP = (ModelConfig.CKPT_DIRPATH /
-                   f'ckpt_epoch_{EPOCH}_step_{STEPS}.pth')
+        CKPT_FP = (
+            ModelConfig.CKPT_DIRPATH /
+            f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
+        )
         assert CKPT_FP.exists()
 
         # THE MODEL

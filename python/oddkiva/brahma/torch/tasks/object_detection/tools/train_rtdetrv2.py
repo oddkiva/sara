@@ -93,7 +93,7 @@ def validate(
             )
 
             (anchor_geometry_logits,
-             anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
+             anchor_class_logits) = aux_train_outputs['anchors']
             anchor_boxes = F.sigmoid(anchor_geometry_logits)
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
