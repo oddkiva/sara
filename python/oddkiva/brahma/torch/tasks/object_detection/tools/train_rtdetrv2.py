@@ -252,6 +252,13 @@ def validate(
             )))
             writer.add_scalar(f'val/global', loss, val_global_step)
 
+    if torchrun_is_running():
+        logger.debug(format_msg((
+            f"[V][E:{epoch:0>2}] "
+            "Waiting for validation completion across all nodes..."
+        )))
+        torch.distributed.barrier()
+
 
 def main(args):
     if args.log_level is not None:
@@ -298,10 +305,10 @@ def main(args):
         freeze_batch_norm(rtdetrv2_model.backbone)
         freeze_parameters(rtdetrv2_model.backbone.blocks[0])
 
-
     # Transfer the model to GPU memory and wrap it as a DDP model.
-    rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
-    torch.distributed.barrier()
+    if torchrun_is_running():
+        rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
+        torch.distributed.barrier()
 
 
     # --------------------------------------------------------------------------
@@ -378,29 +385,29 @@ def main(args):
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
     for epoch in range(10):
-        # logger.info(format_msg(
-        #     f"learning rate = {PipelineConfig.learning_rate}"
-        # ))
+        logger.info(format_msg(
+            f"learning rate = {PipelineConfig.learning_rate}"
+        ))
 
-        # # Get the train dataloader.
-        # train_dl = PipelineConfig.make_train_dataloader(train_ds)
-        # if torchrun_is_running():
-        #     train_dl.sampler.set_epoch(epoch)
+        # Get the train dataloader.
+        train_dl = PipelineConfig.make_train_dataloader(train_ds)
+        if torchrun_is_running():
+            train_dl.sampler.set_epoch(epoch)
 
-        # # Train the model.
-        # train_for_one_epoch(train_dl, gpu_id,
-        #                     rtdetrv2_model,
-        #                     hungarian_loss_fn,
-        #                     loss_reducer,
-        #                     adamw,
-        #                     ema,
-        #                     summary_writer,
-        #                     PipelineConfig.write_interval,
-        #                     epoch,
-        #                     PipelineConfig.gradient_norm_max)
+        # Train the model.
+        train_for_one_epoch(train_dl, gpu_id,
+                            rtdetrv2_model,
+                            hungarian_loss_fn,
+                            loss_reducer,
+                            adamw,
+                            ema,
+                            summary_writer,
+                            PipelineConfig.write_interval,
+                            epoch,
+                            PipelineConfig.gradient_norm_max)
 
-        # # Modulate the learning rate after each epoch.
-        # lr_scheduler.step()
+        # Modulate the learning rate after each epoch.
+        lr_scheduler.step()
 
         # # Save the model after each training epoch.
         # save_model(rtdetrv2_model, epoch)
