@@ -49,7 +49,7 @@ def get_cuda_memory_usage():
     )
     mb_used = result.stdout.decode('utf-8').strip().split('\n')
     mb_used = [f'/GPU/{id}:{mb}' for id, mb in enumerate(mb_used)]
-    mb_used = " ".join(mb_used)
+    mb_used = ", ".join(mb_used)
     return mb_used
 
 
@@ -84,7 +84,9 @@ def validate(
                 tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
                 tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
-            logger.trace(format_msg(f'[val][step:{step}] Feeding annotated images...'))
+            logger.trace(format_msg(
+                f'[val][step:{step}] Feeding annotated images...'
+            ))
             targets = {
                 'boxes': tgt_boxes,
                 'labels': tgt_labels
@@ -99,7 +101,9 @@ def validate(
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
 
-            logger.trace(format_msg(f'[val][step:{step}] Calculating the Hungarian loss...'))
+            logger.trace(format_msg(
+                f'[val][step:{step}] Calculating the Hungarian loss...'
+            ))
             loss_dict = loss_fn.forward(
                 box_geoms, box_class_logits,
                 anchor_boxes, anchor_class_logits,
@@ -107,15 +111,18 @@ def validate(
                 tgt_boxes, tgt_labels
             )
 
-            logger.trace(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
+            logger.trace(format_msg(
+                f'[val][step:{step}] Summing the elementary losses...'
+            ))
             loss = loss_reducer.forward(loss_dict)
-            logger.info(format_msg(f'[val][step:{step}] Loss = {loss}'))
+            logger.info(format_msg(f'[val][step:{step}] Loss = {loss:9.6f}'))
 
-            if step % summary_write_interval == 0:
-                logger.trace(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
-                loss_value = loss
-                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-                writer.add_scalar(f'val/global', loss_value, val_global_step)
+            logger.trace(format_msg(
+                f'[val][step:{step}] Logging to tensorboard...'
+            ))
+            loss_value = loss
+            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+            writer.add_scalar(f'val/global', loss_value, val_global_step)
 
             val_global_step += 1
 
@@ -199,7 +206,7 @@ def train_for_one_epoch(
         ))
         loss = loss_reducer.forward(loss_dict)
         logger.info(format_msg(
-            f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'
+            f'[E:{epoch:0>2},S:{step:0>5}] loss = {loss:9.6f}'
         ))
 
         logger.trace(format_msg(
@@ -224,11 +231,12 @@ def train_for_one_epoch(
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
             writer.add_scalar(f'global', loss_value, train_global_step)
 
-            if gpu_id == 0:
-                logger.info(format_msg((
-                    f'[E:{epoch:0>2},S:{step:0>5}] Mem: '
-                    f'{get_cuda_memory_usage()}'
-                )))
+            if (torch.distributed.get_rank() == 0 and
+                    torchrun_is_running() and
+                    torch.cuda.is_available()):
+                logger.info(
+                    f'[CUDA] {get_cuda_memory_usage()}'
+                )
 
         train_global_step += 1
 
@@ -254,7 +262,7 @@ def main(args):
         logger.info(format_msg(
             f"Loading model weights from checkpoint: {ckpt_fp}"
         ))
-        ckpt = torch.load(ckpt_fp, map_location='cpu')
+        ckpt = torch.load(ckpt_fp, map_location='cpu', weights_only=True)
 
         # NOTE:
         # Clean up the checkpoint file as we fixed the implementation of the
