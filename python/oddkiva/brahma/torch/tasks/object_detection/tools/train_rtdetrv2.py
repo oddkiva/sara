@@ -65,68 +65,6 @@ def ddp_cleanup():
     destroy_process_group()
 
 
-def validate(
-    dataloader: DataLoader,
-    gpu_id: int | None,
-    val_global_step: int,
-    model: torch.nn.Module,
-    loss_fn: torch.nn.Module,
-    loss_reducer: HungarianLossReducer,
-    writer: SummaryWriter,
-    summary_write_interval: int
-) -> None:
-    model.eval()
-
-    with torch.no_grad():
-        for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
-            if gpu_id is not None:
-                imgs = imgs.to(gpu_id)
-                tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
-                tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
-
-            logger.trace(format_msg(
-                f'[val][step:{step}] Feeding annotated images...'
-            ))
-            targets = {
-                'boxes': tgt_boxes,
-                'labels': tgt_labels
-            }
-            box_geoms, box_class_logits, aux_train_outputs = model.forward(
-                imgs, targets
-            )
-
-            (anchor_geometry_logits,
-             anchor_class_logits) = aux_train_outputs['anchors']
-            anchor_boxes = F.sigmoid(anchor_geometry_logits)
-            dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
-            dn_groups = aux_train_outputs['dn_groups']
-
-            logger.trace(format_msg(
-                f'[val][step:{step}] Calculating the Hungarian loss...'
-            ))
-            loss_dict = loss_fn.forward(
-                box_geoms, box_class_logits,
-                anchor_boxes, anchor_class_logits,
-                dn_boxes, dn_class_logits, dn_groups,
-                tgt_boxes, tgt_labels
-            )
-
-            logger.trace(format_msg(
-                f'[val][step:{step}] Summing the elementary losses...'
-            ))
-            loss = loss_reducer.forward(loss_dict)
-            logger.info(format_msg(f'[val][step:{step}] Loss = {loss:9.6f}'))
-
-            logger.trace(format_msg(
-                f'[val][step:{step}] Logging to tensorboard...'
-            ))
-            loss_value = loss
-            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-            writer.add_scalar(f'val/global', loss_value, val_global_step)
-
-            val_global_step += 1
-
-
 def save_model(rtdetrv2_model: torch.nn.Module,
                epoch: int,
                step: int | None = None) -> None:
@@ -147,7 +85,6 @@ def save_model(rtdetrv2_model: torch.nn.Module,
 def train_for_one_epoch(
     dataloader: DataLoader,
     gpu_id: int | None,
-    train_global_step: int,
     model: torch.nn.Module,
     loss_fn: RTDETRHungarianLoss,
     loss_reducer: HungarianLossReducer,
@@ -165,6 +102,8 @@ def train_for_one_epoch(
     model.train()
 
     for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
+        train_global_step = epoch * len(dataloader) + step
+
         # Optimize the GPU memory consumption as per the documentation.
         optimizer.zero_grad(set_to_none=True)
 
@@ -221,27 +160,92 @@ def train_for_one_epoch(
         ema.update(model)
 
         if step % summary_write_interval == 0:
-            logger.trace(format_msg(
-                f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
-            ))
+            # NOTE:
+            # 1. Calculate the average loss across all GPUs.
+            # 2. Log only on the CPU process using GPU node #0.
+            if torchrun_is_running() and torch.distributed.get_rank() == 0:
+                logger.trace(format_msg(
+                    f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
+                ))
 
-            log_elementary_losses(loss_dict, writer, train_global_step)
+                log_elementary_losses(loss_dict, writer, train_global_step)
 
-            loss_value = loss.detach()
-            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-            writer.add_scalar(f'global', loss_value, train_global_step)
+                loss_value = loss.detach()
+                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+                writer.add_scalar(f'global', loss_value, train_global_step)
 
-            if (torch.distributed.get_rank() == 0 and
-                    torchrun_is_running() and
+            if (torchrun_is_running() and
+                    torch.distributed.get_rank() == 0 and
                     torch.cuda.is_available()):
-                logger.info(
-                    f'[CUDA] {get_cuda_memory_usage()}'
-                )
-
-        train_global_step += 1
+                logger.info(f'[CUDA] {get_cuda_memory_usage()}')
 
         if step > 0 and step % 1000 == 0:
             save_model(model, epoch, step)
+
+
+def validate(
+    dataloader: DataLoader,
+    gpu_id: int | None,
+    epoch: int,
+    model: torch.nn.Module,
+    loss_fn: torch.nn.Module,
+    loss_reducer: HungarianLossReducer,
+    writer: SummaryWriter,
+) -> None:
+    model.eval()
+
+    val_global_step = epoch * len(dataloader)
+
+    with torch.no_grad():
+        for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
+            if gpu_id is not None:
+                imgs = imgs.to(gpu_id)
+                tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
+                tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
+
+            logger.trace(format_msg(
+                f'[val][step:{step}] Feeding annotated images...'
+            ))
+            targets = {
+                'boxes': tgt_boxes,
+                'labels': tgt_labels
+            }
+            box_geoms, box_class_logits, aux_train_outputs = model.forward(
+                imgs, targets
+            )
+
+            (anchor_geometry_logits,
+             anchor_class_logits) = aux_train_outputs['anchors']
+            anchor_boxes = F.sigmoid(anchor_geometry_logits)
+            dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
+            dn_groups = aux_train_outputs['dn_groups']
+
+            logger.trace(format_msg(
+                f'[val][step:{step}] Calculating the Hungarian loss...'
+            ))
+            loss_dict = loss_fn.forward(
+                box_geoms, box_class_logits,
+                anchor_boxes, anchor_class_logits,
+                dn_boxes, dn_class_logits, dn_groups,
+                tgt_boxes, tgt_labels
+            )
+
+            logger.trace(format_msg(
+                f'[val][step:{step}] Summing the elementary losses...'
+            ))
+            loss = loss_reducer.forward(loss_dict)
+            logger.info(format_msg(f'[val][step:{step}] Loss = {loss:9.6f}'))
+
+            logger.trace(format_msg(
+                f'[val][step:{step}] Logging to tensorboard...'
+            ))
+
+            if torchrun_is_running() and torch.distributed.get_rank() == 0:
+                loss_value = loss
+                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+                writer.add_scalar(f'val/global', loss_value, val_global_step)
+
+            val_global_step += 1
 
 
 def main(args):
@@ -368,8 +372,6 @@ def main(args):
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
-    train_global_step = 0
-    val_global_step = 0
     for epoch in range(10):
         logger.info(format_msg(
             f"learning rate = {PipelineConfig.learning_rate}"
@@ -382,7 +384,6 @@ def main(args):
 
         # Train the model.
         train_for_one_epoch(train_dl, gpu_id,
-                            train_global_step,
                             rtdetrv2_model,
                             hungarian_loss_fn,
                             loss_reducer,
@@ -399,15 +400,13 @@ def main(args):
         # Save the model after each training epoch.
         save_model(rtdetrv2_model, epoch)
 
-        # Evaluate the model.
-        val_dl = PipelineConfig.make_val_dataloader(val_ds)
-        if torchrun_is_running():
-            val_dl.sampler.set_epoch(epoch)
-        validate(val_dl, gpu_id, val_global_step,
-                 rtdetrv2_model,
-                 hungarian_loss_fn, loss_reducer,
-                 summary_writer,
-                 PipelineConfig.write_interval)
+        ## Evaluate the model.
+        #val_dl = PipelineConfig.make_val_dataloader(val_ds)
+        #if torchrun_is_running():
+        #    val_dl.sampler.set_epoch(epoch)
+        #validate(val_dl, gpu_id, epoch,
+        #         rtdetrv2_model, hungarian_loss_fn, loss_reducer,
+        #         summary_writer)
 
 
 if __name__ == "__main__":
