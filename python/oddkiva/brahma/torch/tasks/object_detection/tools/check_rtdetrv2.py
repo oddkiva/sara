@@ -50,11 +50,11 @@ class ModelConfig:
     CONFIDENCE_THRESHOLD = 0.4
 
     RUN_ON_CPU = False
-    USE_RESUME_CKPT = True
+    LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 10
-    EPOCH = 3
-    STEPS = 2000
+    EPOCH = 0
+    STEPS = 1000
 
 
     @staticmethod
@@ -66,7 +66,7 @@ class ModelConfig:
         else:
             device = torch.device('cuda:1')
 
-        if ModelConfig.USE_RESUME_CKPT:
+        if ModelConfig.LOAD_RESUME_CKPT:
             filename = '{}-ckpt_epoch_{}_step_{}.pth'.format(
                 ModelConfig.RESUME_ITER,
                 ModelConfig.EPOCH,
