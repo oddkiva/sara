@@ -48,8 +48,8 @@ def get_cuda_memory_usage():
         stdout=subprocess.PIPE
     )
     mb_used = result.stdout.decode('utf-8').strip().split('\n')
-    mb_used = [f'[GPU:{id}] {mb}' for id, mb in enumerate(mb_used)]
-    mb_used = "\n".join(mb_used)
+    mb_used = [f'GPU{id}: {mb}' for id, mb in enumerate(mb_used)]
+    mb_used = ", ".join(mb_used)
     return mb_used
 
 
@@ -226,7 +226,7 @@ def train_for_one_epoch(
 
             if gpu_id == 0:
                 logger.info(format_msg((
-                    f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
+                    f'[E:{epoch:0>2},S:{step:0>5}] Memory: '
                     f'{get_cuda_memory_usage()}'
                 )))
 

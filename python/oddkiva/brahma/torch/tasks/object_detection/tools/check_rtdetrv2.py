@@ -15,7 +15,6 @@ import oddkiva.sara.graphics.image_draw as image_draw
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
-from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -37,20 +36,29 @@ def optimize_repvgg_layer_for_inference(m: nn.Module):
 class ModelConfig:
     CKPT_DIRPATH = (DATA_DIR_PATH / 'trained_models' / 'rtdetrv2_r50' /
                     'train' / 'coco' / 'ckpts')
+    CKPT_RESUME_DIRPATH = (DATA_DIR_PATH / 'trained_models' / 'rtdetrv2_r50' /
+                           'train' / 'coco' / 'ckpts-resume')
     LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                        'labels.txt')
+
+    CKPT_DIRPATH.exists()
+    CKPT_RESUME_DIRPATH.exists()
+    LABELS_FILEPATH.exists()
+
     W_INFER = 640
     H_INFER = 640
+    CONFIDENCE_THRESHOLD = 0.4
 
     RUN_ON_CPU = False
-    EPOCH = 0
-    STEPS = 1000
-    CONFIDENCE_THRESHOLD = 0.4
+    USE_RESUME_CKPT = True
+
+    RESUME_ITER = 10
+    EPOCH = 3
+    STEPS = 2000
+
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
-        assert ModelConfig.CKPT_DIRPATH.exists()
-        assert ModelConfig.LABELS_FILEPATH.exists()
 
         # This is by design so that we can keep training with the GPU...
         if ModelConfig.RUN_ON_CPU:
@@ -58,10 +66,18 @@ class ModelConfig:
         else:
             device = torch.device('cuda:1')
 
-        CKPT_FP = (
-            ModelConfig.CKPT_DIRPATH /
-            f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
-        )
+        if ModelConfig.USE_RESUME_CKPT:
+            filename = '{}-ckpt_epoch_{}_step_{}.pth'.format(
+                ModelConfig.RESUME_ITER,
+                ModelConfig.EPOCH,
+                ModelConfig.STEPS
+            )
+            CKPT_FP = ModelConfig.CKPT_RESUME_DIRPATH / filename
+        else:
+            CKPT_FP = (
+                ModelConfig.CKPT_DIRPATH /
+                f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
+            )
         assert CKPT_FP.exists()
 
         # THE MODEL
