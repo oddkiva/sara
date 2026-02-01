@@ -43,8 +43,8 @@ class ModelConfig:
     H_INFER = 640
 
     RUN_ON_CPU = True
-    EPOCH = 0
-    STEPS = 4000
+    EPOCH = 2
+    STEPS = 7000
     CONFIDENCE_THRESHOLD = 0.45
 
     @staticmethod

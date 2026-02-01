@@ -149,7 +149,7 @@ def train_for_one_epoch(
     summary_write_interval: int,
     epoch: int,
     max_norm: float | None,
-    debug: bool = False
+    debug: bool = False,
 ) -> None:
     if debug:
         torch.autograd.set_detect_anomaly(True)
@@ -230,6 +230,7 @@ def main(args):
     # THE MODEL
     gpu_id = get_local_rank()
     rtdetrv2_model = PipelineConfig.make_model()
+
     # Load the model weights.
     ckpt_fp = args.resume
     if ckpt_fp is not None:
@@ -250,6 +251,7 @@ def main(args):
 
         rtdetrv2_model.load_state_dict(ckpt)
 
+    if args.freeze_low_layers:
         # NOTE:
         # In later epochs, we can freeze the parameters of:
         # - the first block of the backbone
@@ -396,6 +398,11 @@ if __name__ == "__main__":
         type=str,
         help=("Load the backbone weights from the public checkpoint provided "
               "by RT-DETR's authors.")
+    )
+    parser.add_argument(
+        '-f', '--freeze_low_layers',
+        action='store_true',
+        help="Freeze the low level layers of the backbone"
     )
     args = parser.parse_args()
 
