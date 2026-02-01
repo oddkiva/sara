@@ -162,15 +162,15 @@ def train_for_one_epoch(
             # NOTE:
             # 1. Calculate the average loss across all GPUs.
             # 2. Log only on the CPU process using GPU node #0.
+            logger.trace(format_msg(
+                f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
+            ))
+
+            log_elementary_losses(loss_dict, writer, train_global_step)
+
+            loss_value = loss.detach()
+            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
             if torchrun_is_running() and torch.distributed.get_rank() == 0:
-                logger.trace(format_msg(
-                    f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
-                ))
-
-                log_elementary_losses(loss_dict, writer, train_global_step)
-
-                loss_value = loss.detach()
-                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
                 writer.add_scalar(f'global', loss_value, train_global_step)
 
             if (torchrun_is_running() and
@@ -409,8 +409,8 @@ def main(args):
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()
 
-        # # Save the model after each training epoch.
-        # save_model(rtdetrv2_model, epoch)
+        # Save the model after each training epoch.
+        save_model(rtdetrv2_model, epoch)
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_val_dataloader(val_ds)
