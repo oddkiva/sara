@@ -48,8 +48,8 @@ def get_cuda_memory_usage():
         stdout=subprocess.PIPE
     )
     mb_used = result.stdout.decode('utf-8').strip().split('\n')
-    mb_used = [f'GPU{id}: {mb}' for id, mb in enumerate(mb_used)]
-    mb_used = ", ".join(mb_used)
+    mb_used = [f'/GPU/{id}:{mb}' for id, mb in enumerate(mb_used)]
+    mb_used = " ".join(mb_used)
     return mb_used
 
 
@@ -109,7 +109,7 @@ def validate(
 
             logger.trace(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
             loss = loss_reducer.forward(loss_dict)
-            logger.info(format_msg(f'[val][step:{step}] Global loss = {loss}'))
+            logger.info(format_msg(f'[val][step:{step}] Loss = {loss}'))
 
             if step % summary_write_interval == 0:
                 logger.trace(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
@@ -226,7 +226,7 @@ def train_for_one_epoch(
 
             if gpu_id == 0:
                 logger.info(format_msg((
-                    f'[E:{epoch:0>2},S:{step:0>5}] Memory: '
+                    f'[E:{epoch:0>2},S:{step:0>5}] Mem: '
                     f'{get_cuda_memory_usage()}'
                 )))
 
