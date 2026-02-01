@@ -42,10 +42,10 @@ class ModelConfig:
     W_INFER = 640
     H_INFER = 640
 
-    RUN_ON_CPU = True
-    EPOCH = 2
-    STEPS = 7000
-    CONFIDENCE_THRESHOLD = 0.45
+    RUN_ON_CPU = False
+    EPOCH = 0
+    STEPS = 1000
+    CONFIDENCE_THRESHOLD = 0.4
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:

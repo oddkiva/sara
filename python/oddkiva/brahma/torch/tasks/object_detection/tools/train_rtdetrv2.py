@@ -3,6 +3,7 @@
 import argparse
 import atexit
 import subprocess
+import sys
 
 from loguru import logger
 
@@ -39,7 +40,7 @@ from oddkiva.brahma.torch.tasks.object_detection.configs.\
     )
 
 
-def get_gpu_memory_usage():
+def get_cuda_memory_usage():
     result = subprocess.run(
         ['nvidia-smi',
          '--query-gpu=memory.used',
@@ -83,7 +84,7 @@ def validate(
                 tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
                 tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
-            logger.info(format_msg(f'[val][step:{step}] Feeding annotated images...'))
+            logger.trace(format_msg(f'[val][step:{step}] Feeding annotated images...'))
             targets = {
                 'boxes': tgt_boxes,
                 'labels': tgt_labels
@@ -98,7 +99,7 @@ def validate(
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
 
-            logger.info(format_msg(f'[val][step:{step}] Calculating the Hungarian loss...'))
+            logger.trace(format_msg(f'[val][step:{step}] Calculating the Hungarian loss...'))
             loss_dict = loss_fn.forward(
                 box_geoms, box_class_logits,
                 anchor_boxes, anchor_class_logits,
@@ -106,12 +107,12 @@ def validate(
                 tgt_boxes, tgt_labels
             )
 
-            logger.info(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
+            logger.trace(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
             loss = loss_reducer.forward(loss_dict)
             logger.info(format_msg(f'[val][step:{step}] Global loss = {loss}'))
 
             if step % summary_write_interval == 0:
-                logger.info(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
+                logger.trace(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
                 loss_value = loss
                 torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
                 writer.add_scalar(f'val/global', loss_value, val_global_step)
@@ -164,11 +165,13 @@ def train_for_one_epoch(
             imgs = imgs.to(gpu_id)
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
-        logger.info(format_msg(
+        logger.trace(format_msg(
             f'[E:{epoch:0>2},S:{step:0>5}] Batch size: {imgs.shape[0]}'
         ))
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'))
+        logger.trace(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'
+        ))
         targets = {
             'boxes': tgt_boxes,
             'labels': tgt_labels
@@ -181,7 +184,9 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'))
+        logger.trace(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'
+        ))
         loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
@@ -189,11 +194,17 @@ def train_for_one_epoch(
             tgt_boxes, tgt_labels
         )
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'))
+        logger.trace(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'
+        ))
         loss = loss_reducer.forward(loss_dict)
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'
+        ))
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
+        logger.trace(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'
+        ))
         loss.backward()
         if max_norm is not None:
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
@@ -203,7 +214,9 @@ def train_for_one_epoch(
         ema.update(model)
 
         if step % summary_write_interval == 0:
-            logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'))
+            logger.trace(format_msg(
+                f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
+            ))
 
             log_elementary_losses(loss_dict, writer, train_global_step)
 
@@ -211,10 +224,11 @@ def train_for_one_epoch(
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
             writer.add_scalar(f'global', loss_value, train_global_step)
 
-            logger.info(format_msg((
-                f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
-                f'{get_gpu_memory_usage()}'
-            )))
+            if gpu_id == 0:
+                logger.info(format_msg((
+                    f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
+                    f'{get_cuda_memory_usage()}'
+                )))
 
         train_global_step += 1
 
@@ -223,6 +237,9 @@ def train_for_one_epoch(
 
 
 def main(args):
+    if args.log_level is not None:
+        logger.add(sys.stdout, level=str(args.log_level).upper())
+
     # PARALLEL TRAINING
     ddp_setup()
 
@@ -403,6 +420,11 @@ if __name__ == "__main__":
         '-f', '--freeze_low_layers',
         action='store_true',
         help="Freeze the low level layers of the backbone"
+    )
+    parser.add_argument(
+        '-l', '--log_level',
+        type=str,
+        help="Logging level [trace|debug|info]"
     )
     args = parser.parse_args()
 
