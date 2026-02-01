@@ -8,7 +8,6 @@ import sys
 from loguru import logger
 
 import torch
-import torch.nn.functional as F
 from torch.distributed import (
     ReduceOp,
     destroy_process_group
@@ -194,18 +193,23 @@ def validate(
 ) -> None:
     model.eval()
 
-    val_global_step = epoch * len(dataloader)
+    n = len(dataloader)
+    ws = torch.distributed.get_world_size()
+    rk = torch.distributed.get_rank()
 
     with torch.no_grad():
         for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
+            val_global_step = n * ws * epoch + ws * step + rk
+
             if gpu_id is not None:
                 imgs = imgs.to(gpu_id)
                 tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
                 tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
-            logger.trace(format_msg(
-                f'[val][step:{step}] Feeding annotated images...'
-            ))
+            logger.trace(format_msg((
+                f"[V][E:{epoch:0>2},S:{step:0>5}] "
+                "Feeding annotated images..."
+            )))
             targets = {
                 'boxes': tgt_boxes,
                 'labels': tgt_labels
@@ -214,15 +218,14 @@ def validate(
                 imgs, targets
             )
 
-            (anchor_geometry_logits,
-             anchor_class_logits) = aux_train_outputs['anchors']
-            anchor_boxes = F.sigmoid(anchor_geometry_logits)
+            anchor_boxes, anchor_class_logits = aux_train_outputs['anchors']
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
 
-            logger.trace(format_msg(
-                f'[val][step:{step}] Calculating the Hungarian loss...'
-            ))
+            logger.trace(format_msg((
+                f"[V][E:{epoch:0>2},S:{step:0>5}] "
+                "Calculating the Hungarian loss..."
+            )))
             loss_dict = loss_fn.forward(
                 box_geoms, box_class_logits,
                 anchor_boxes, anchor_class_logits,
@@ -230,22 +233,24 @@ def validate(
                 tgt_boxes, tgt_labels
             )
 
-            logger.trace(format_msg(
-                f'[val][step:{step}] Summing the elementary losses...'
-            ))
+            logger.trace(format_msg((
+                f"[V][E:{epoch:0>2},S:{step:0>5}] "
+                "Summing the elementary losses..."
+            )))
             loss = loss_reducer.forward(loss_dict)
-            logger.info(format_msg(f'[val][step:{step}] Loss = {loss:9.6f}'))
-
-            logger.trace(format_msg(
-                f'[val][step:{step}] Logging to tensorboard...'
+            logger.info(format_msg(
+                f"[V][E:{epoch:0>2},S:{step:0>5}] Loss = {loss:9.6f}"
             ))
 
-            if torchrun_is_running() and torch.distributed.get_rank() == 0:
-                loss_value = loss
-                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-                writer.add_scalar(f'val/global', loss_value, val_global_step)
+            logger.trace(format_msg(
+                f"[V][E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard..."
+            ))
 
-            val_global_step += 1
+            logger.debug(format_msg((
+                f"[V][E:{epoch:0>2},S:{step:0>5}] "
+                f"global step: {val_global_step}"
+            )))
+            writer.add_scalar(f'val/global', loss, val_global_step)
 
 
 def main(args):
@@ -373,40 +378,40 @@ def main(args):
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
     for epoch in range(10):
-        logger.info(format_msg(
-            f"learning rate = {PipelineConfig.learning_rate}"
-        ))
+        # logger.info(format_msg(
+        #     f"learning rate = {PipelineConfig.learning_rate}"
+        # ))
 
-        # Get the train dataloader.
-        train_dl = PipelineConfig.make_train_dataloader(train_ds)
+        # # Get the train dataloader.
+        # train_dl = PipelineConfig.make_train_dataloader(train_ds)
+        # if torchrun_is_running():
+        #     train_dl.sampler.set_epoch(epoch)
+
+        # # Train the model.
+        # train_for_one_epoch(train_dl, gpu_id,
+        #                     rtdetrv2_model,
+        #                     hungarian_loss_fn,
+        #                     loss_reducer,
+        #                     adamw,
+        #                     ema,
+        #                     summary_writer,
+        #                     PipelineConfig.write_interval,
+        #                     epoch,
+        #                     PipelineConfig.gradient_norm_max)
+
+        # # Modulate the learning rate after each epoch.
+        # lr_scheduler.step()
+
+        # # Save the model after each training epoch.
+        # save_model(rtdetrv2_model, epoch)
+
+        # Evaluate the model.
+        val_dl = PipelineConfig.make_val_dataloader(val_ds)
         if torchrun_is_running():
-            train_dl.sampler.set_epoch(epoch)
-
-        # Train the model.
-        train_for_one_epoch(train_dl, gpu_id,
-                            rtdetrv2_model,
-                            hungarian_loss_fn,
-                            loss_reducer,
-                            adamw,
-                            ema,
-                            summary_writer,
-                            PipelineConfig.write_interval,
-                            epoch,
-                            PipelineConfig.gradient_norm_max)
-
-        # Modulate the learning rate after each epoch.
-        lr_scheduler.step()
-
-        # Save the model after each training epoch.
-        save_model(rtdetrv2_model, epoch)
-
-        ## Evaluate the model.
-        #val_dl = PipelineConfig.make_val_dataloader(val_ds)
-        #if torchrun_is_running():
-        #    val_dl.sampler.set_epoch(epoch)
-        #validate(val_dl, gpu_id, epoch,
-        #         rtdetrv2_model, hungarian_loss_fn, loss_reducer,
-        #         summary_writer)
+            val_dl.sampler.set_epoch(epoch)
+        validate(val_dl, gpu_id, epoch,
+                 rtdetrv2_model, hungarian_loss_fn, loss_reducer,
+                 summary_writer)
 
 
 if __name__ == "__main__":
