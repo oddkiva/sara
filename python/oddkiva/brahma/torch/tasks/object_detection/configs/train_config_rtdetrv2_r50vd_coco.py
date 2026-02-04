@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 from loguru import logger
 
-import torch
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
@@ -58,7 +57,28 @@ class TrainValTestDatasetConfig:
             rotation_range=10,
             translation_range=(0.1, 0.1),
             scaling_range=(0.5, 1.5),
-            probability=0.8,
+            # NOTE
+            #
+            # In the first epochs, I deemed necessary to feed a larger number
+            # of bounding boxes per training images, and therefore use the
+            # mosaic data transform 80% of the time:
+            # probability=0.8,
+            #
+            # Now that we have kept training the model for about 20 cumulated
+            # epochs (because of interruptions) like that. Now I want to see
+            # whether by using the mosaic data transform only 50% of the time
+            # will improve the detection performance and the object
+            # classification.
+            #
+            # The reason is that while the mosaic data transform provides a
+            # larger number of bounding boxes, the cost we pay is that we lose
+            # a lot of the richer and finer textural information that
+            # characterizes every object of interest because of the pixel
+            # sampling.
+            #
+            # A visual monitoring of the training seems to show that we are
+            # able to detect a lot more smaller objects.
+            probability=0.5,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,

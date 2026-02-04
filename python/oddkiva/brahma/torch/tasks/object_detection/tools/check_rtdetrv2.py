@@ -54,7 +54,7 @@ class ModelConfig:
 
     RESUME_ITER = 10
     EPOCH = 0
-    STEPS = 1000
+    STEPS = 6000
 
 
     @staticmethod
@@ -74,10 +74,16 @@ class ModelConfig:
             )
             CKPT_FP = ModelConfig.CKPT_RESUME_DIRPATH / filename
         else:
-            CKPT_FP = (
-                ModelConfig.CKPT_DIRPATH /
-                f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
-            )
+            if ModelConfig.STEPS is None:
+                CKPT_FP = (
+                    ModelConfig.CKPT_DIRPATH /
+                    f'ckpt_epoch_{ModelConfig.EPOCH}.pth'
+                )
+            else:
+                CKPT_FP = (
+                    ModelConfig.CKPT_DIRPATH /
+                    f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
+                )
         assert CKPT_FP.exists()
 
         # THE MODEL

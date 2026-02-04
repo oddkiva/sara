@@ -392,6 +392,10 @@ def main(args):
         # Get the train dataloader.
         train_dl = PipelineConfig.make_train_dataloader(train_ds)
         if torchrun_is_running():
+            # NOTE: ensure the shuffling is different at each epoch in
+            # distributed mode (cf.
+            # https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.distributed.DistributedSampler)
+            assert type(train_dl.sampler) is torch.utils.data.DistributedSampler
             train_dl.sampler.set_epoch(epoch)
 
         # Train the model.
@@ -414,8 +418,6 @@ def main(args):
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_val_dataloader(val_ds)
-        if torchrun_is_running():
-            val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, epoch,
                  rtdetrv2_model, hungarian_loss_fn, loss_reducer,
                  summary_writer)
