@@ -47,8 +47,18 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
+    # NOTE:
+    #
+    # I can't get more than 5 training samples in a batch on a NVIDIA Titan X
+    # (Pascal) 12GB GPU.
+    #
+    # Unless I freeze:
+    # - the 1st convolutional blocks of the PResNet-50 backbone
+    # - the batch norm layers of the PResNet-50 backbone,
+    # I can get up to 8 samples per batch.
     train_batch_size: int = 5
     num_workers: int = 5
+
     val_batch_size: int = 32
 
     train_transform: v2.Transform = v2.Compose([
@@ -77,7 +87,9 @@ class TrainValTestDatasetConfig:
             # sampling.
             #
             # A visual monitoring of the training seems to show that we are
-            # able to detect a lot more smaller objects.
+            # able to detect a lot more smaller objects. I observe that every
+            # 1000 iterations, on the same test videos the detection of
+            # pedestrians get better and better.
             probability=0.5,
             fill_value=0,
             use_cache=False,

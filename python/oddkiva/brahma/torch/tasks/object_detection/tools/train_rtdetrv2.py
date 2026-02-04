@@ -64,6 +64,22 @@ def ddp_cleanup():
     destroy_process_group()
 
 
+def cleanup_checkpoint(ckpt: dict):
+    """
+    Clean up the checkpoint file as we fixed the implementation of the
+    transformer decoder recently.
+
+    NOTE:
+    We keep this for historical reasons.
+    """
+    ckpt = {
+        k: v
+        for k, v in ckpt.items()
+        if (not k.startswith('decoder.decoder_class_logits_head') and
+            not k.startswith('decoder.decoder_box_geometry_head'))
+    }
+
+
 def save_model(rtdetrv2_model: torch.nn.Module,
                epoch: int,
                step: int | None = None) -> None:
@@ -280,16 +296,6 @@ def main(args):
         ))
         ckpt = torch.load(ckpt_fp, map_location='cpu', weights_only=True)
 
-        # NOTE:
-        # Clean up the checkpoint file as we fixed the implementation of the
-        # transformer decoder recently.
-        ckpt = {
-            k: v
-            for k, v in ckpt.items()
-            if (not k.startswith('decoder.decoder_class_logits_head') and
-                not k.startswith('decoder.decoder_box_geometry_head'))
-        }
-
         rtdetrv2_model.load_state_dict(ckpt)
 
     if args.freeze_low_layers:
@@ -302,6 +308,10 @@ def main(args):
         #
         # This is what RT-DETR's original implementation does and it can afford
         # to do that as it starts from a pretrained backbone.
+        #
+        # For the time being, I prefer staying patient and on the safe side and
+        # train every single parameter as I want to get the best trained model
+        # I can.
         freeze_batch_norm(rtdetrv2_model.backbone)
         freeze_parameters(rtdetrv2_model.backbone.blocks[0])
 

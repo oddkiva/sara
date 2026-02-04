@@ -54,7 +54,7 @@ class ModelConfig:
 
     RESUME_ITER = 10
     EPOCH = 0
-    STEPS = 6000
+    STEPS = 8000
 
 
     @staticmethod
