@@ -47,7 +47,7 @@ class ModelConfig:
 
     W_INFER = 640
     H_INFER = 640
-    CONFIDENCE_THRESHOLD = 0.4
+    CONFIDENCE_THRESHOLD = 0.5
 
     RUN_ON_CPU = False
     LOAD_RESUME_CKPT = False
