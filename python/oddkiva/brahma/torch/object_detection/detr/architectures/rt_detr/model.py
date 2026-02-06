@@ -240,7 +240,7 @@ class RTDETRv2(nn.Module):
             # Backbone.
             {
                 'params': [p for _, p in b_params.items()],
-                'lr': 1e-5,
+                'lr': 5e-5,
             },
             # Hybrid encoder (AIFI+CCFF).
             {
