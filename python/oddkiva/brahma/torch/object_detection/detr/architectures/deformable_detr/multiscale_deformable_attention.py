@@ -473,7 +473,7 @@ class MultiscaleDeformableAttention(nn.Module):
                 # dimension d_v. That's why the value dimension is at the end.
                 values_sampled_l = value_map_l[nm_l, :, y_l, x_l]\
                     .permute(0, 3, 1, 2)
-                assert values_sampled_l.shape == (N * M, card_Q, K, d_v)
+                assert values_sampled_l.shape == (N * M, d_v, card_Q, K)
 
             # Shape is (N * M, d_v, top-K, K)
             values_per_level.append(values_sampled_l)
