@@ -1,4 +1,6 @@
-import sys
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+import argparse
 from pathlib import Path
 
 from loguru import logger
@@ -53,7 +55,7 @@ class ModelConfig:
     LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 14
-    EPOCH = 0
+    EPOCH = 1
     STEPS = 4000
 
     @staticmethod
@@ -150,7 +152,26 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
 
 
 def user_main():
-    video_file = sys.argv[1]
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        'video',
+        type=str,
+        help='video filepath'
+    )
+    parser.add_argument(
+        '-s', '--skip',
+        type=int,
+        help='Number of video frames to skip'
+    )
+    args = parser.parse_args()
+
+    if args.video is None:
+        parser.print_usage()
+    
+    video_file = args.video
+    video_frame_skip_count = args.skip if args.skip is not None else 0
+
     assert Path(video_file).exists()
     video_stream = sara.VideoStream()
     video_stream.open(video_file, True)
@@ -164,7 +185,6 @@ def user_main():
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     display_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     video_frame_index = - 1
-    video_frame_skip_count = 2
 
     label_colors = generate_label_colors(len(label_names))
 
