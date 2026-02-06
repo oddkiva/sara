@@ -47,7 +47,7 @@ class ModelConfig:
 
     W_INFER = 640
     H_INFER = 640
-    CONFIDENCE_THRESHOLD = 0.2
+    CONFIDENCE_THRESHOLD = 0.4
 
     RUN_ON_CPU = False
     LOAD_RESUME_CKPT = True
@@ -199,15 +199,12 @@ def user_main():
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = f'{label_names[label]} {conf:0.2f}'
-                font_color = [191] * 3
-
-                print(f'[{text}] ({l}, {t}, {w}, {h})')
-
+                # Quick-and-dirty for a better text-background contrast
+                font_color = [63] * 3 if label % 2 == 0 else [191] * 3
                 image_draw.draw_boxed_text(display_frame, p, text, color,
                                            font, font_color)
 
             sara.draw_image(display_frame)
-            sara.get_key()
 
 
 if __name__ == '__main__':
