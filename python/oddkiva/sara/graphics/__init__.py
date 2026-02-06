@@ -78,7 +78,6 @@ def draw_boxed_text(x: int | float, y: int | float, text: str,
     draw_text((l, t - 2 * text_x_offset), text, text_color, font.pointSize(),
               angle, font.italic(), font.bold(), font.underline())
 
-
 def draw_image(image, offset: tuple[int, int] = (0, 0), scale: float = 1):
     user_thread = GraphicsContext().user_thread
     h, w, c = image.shape

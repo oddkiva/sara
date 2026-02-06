@@ -71,11 +71,10 @@ class TrainValTestDatasetConfig:
             #
             # In the first epochs, I deemed necessary to feed a larger number
             # of bounding boxes per training images, and therefore use the
-            # mosaic data transform 80% of the time:
-            # probability=0.8,
+            # mosaic data transform 80% of the time.
             #
             # Now that we have kept training the model for about 20 cumulated
-            # epochs (because of interruptions) like that. Now I want to see
+            # epochs (because of interruptions) like that, I want to see
             # whether by using the mosaic data transform only 50% of the time
             # will improve the detection performance and the object
             # classification.
@@ -90,7 +89,14 @@ class TrainValTestDatasetConfig:
             # able to detect a lot more smaller objects. I observe that every
             # 1000 iterations, on the same test videos the detection of
             # pedestrians get better and better.
-            probability=0.5,
+            #
+            # At some point we really need to do less mosaic data transform so
+            # the backbone learns to better represent images and therefore will
+            # aid in the classification score.
+            #
+            # probability=0.8,
+            # probability=0.5,
+            probability=0.3,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,

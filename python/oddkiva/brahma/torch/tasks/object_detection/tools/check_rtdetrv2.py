@@ -47,15 +47,33 @@ class ModelConfig:
 
     W_INFER = 640
     H_INFER = 640
-    CONFIDENCE_THRESHOLD = 0.5
+    CONFIDENCE_THRESHOLD = 0.2
 
     RUN_ON_CPU = False
-    LOAD_RESUME_CKPT = False
+    LOAD_RESUME_CKPT = True
 
-    RESUME_ITER = 10
-    EPOCH = 0
-    STEPS = 8000
+    RESUME_ITER = 14
+    EPOCH = 4
+    STEPS = 3000
 
+    @staticmethod
+    def checkpoint_filepath() -> Path:
+        if ModelConfig.STEPS is None:
+            filename = 'ckpt_epoch_{ModelConfig.EPOCH}.pth'
+        else:
+            filename = 'ckpt_epoch_{}_step_{}.pth'.format(
+                ModelConfig.EPOCH,
+                ModelConfig.STEPS
+            )
+        if ModelConfig.LOAD_RESUME_CKPT:
+            filename = f'{ModelConfig.RESUME_ITER}-{filename}'
+
+        if ModelConfig.LOAD_RESUME_CKPT:
+            fp = ModelConfig.CKPT_RESUME_DIRPATH / filename
+        else:
+            fp = ModelConfig.CKPT_DIRPATH / filename
+
+        return fp
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -66,33 +84,15 @@ class ModelConfig:
         else:
             device = torch.device('cuda:1')
 
-        if ModelConfig.LOAD_RESUME_CKPT:
-            filename = '{}-ckpt_epoch_{}_step_{}.pth'.format(
-                ModelConfig.RESUME_ITER,
-                ModelConfig.EPOCH,
-                ModelConfig.STEPS
-            )
-            CKPT_FP = ModelConfig.CKPT_RESUME_DIRPATH / filename
-        else:
-            if ModelConfig.STEPS is None:
-                CKPT_FP = (
-                    ModelConfig.CKPT_DIRPATH /
-                    f'ckpt_epoch_{ModelConfig.EPOCH}.pth'
-                )
-            else:
-                CKPT_FP = (
-                    ModelConfig.CKPT_DIRPATH /
-                    f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
-                )
-        assert CKPT_FP.exists()
-
         # THE MODEL
         config = RTDETRConfig()
         config.setup_for_inference(True)
         model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
-        ckpt = torch.load(CKPT_FP, weights_only=True, map_location=device)
+        ckpt = torch.load(ModelConfig.checkpoint_filepath(),
+                          weights_only=True,
+                          map_location=device)
         model.load_state_dict(ckpt)
 
         model = freeze_batch_norm(model)
@@ -170,6 +170,8 @@ def user_main():
 
     label_colors = generate_label_colors(len(label_names))
 
+    font = sara.make_font()
+
     while video_stream.read(video_frame):
         video_frame_index += 1
         if video_frame_index % (video_frame_skip_count + 1) != 0:
@@ -197,15 +199,15 @@ def user_main():
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = f'{label_names[label]} {conf:0.2f}'
-                font_size = 12
-                bold = True
+                font_color = [191] * 3
 
                 print(f'[{text}] ({l}, {t}, {w}, {h})')
 
-                image_draw.draw_text(display_frame, p, text, color,
-                                     font_size, 0, False, bold, False)
+                image_draw.draw_boxed_text(display_frame, p, text, color,
+                                           font, font_color)
 
             sara.draw_image(display_frame)
+            sara.get_key()
 
 
 if __name__ == '__main__':
