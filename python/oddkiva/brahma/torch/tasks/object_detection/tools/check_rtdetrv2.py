@@ -50,11 +50,11 @@ class ModelConfig:
     CONFIDENCE_THRESHOLD = 0.4
 
     RUN_ON_CPU = False
-    LOAD_RESUME_CKPT = True
+    LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 14
-    EPOCH = 4
-    STEPS = 3000
+    EPOCH = 0
+    STEPS = 4000
 
     @staticmethod
     def checkpoint_filepath() -> Path:
@@ -77,8 +77,6 @@ class ModelConfig:
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
-
-        # This is by design so that we can keep training with the GPU...
         if ModelConfig.RUN_ON_CPU:
             device = torch.device('cpu')
         else:

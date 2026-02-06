@@ -156,7 +156,6 @@ def fill_rect(array: np.ndarray,
     surface = to_qimage(array)
     p = QPainter(surface)
 
-    p.begin(surface)
     p.fillRect(
         QRectF(QPointF(*top_left_corner), QSizeF(*sizes)),
         QBrush(QColor(*color))
