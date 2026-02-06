@@ -96,7 +96,8 @@ class TrainValTestDatasetConfig:
             #
             # probability=0.8,
             # probability=0.5,
-            probability=0.3,
+            # probability=0.3,
+            probability=0.25,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,
