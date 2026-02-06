@@ -48,7 +48,7 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 8
+    train_batch_size: int = 32
     num_workers: int = 8
     val_batch_size: int = 32
 
@@ -58,7 +58,7 @@ class TrainValTestDatasetConfig:
             rotation_range=10,
             translation_range=(0.1, 0.1),
             scaling_range=(0.5, 1.5),
-            probability=0.8,
+            probability=0.5,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,

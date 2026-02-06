@@ -14,6 +14,7 @@ from torch.distributed import (
 )
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch import DEFAULT_DEVICE
@@ -387,6 +388,7 @@ def main(args):
         # Get the train dataloader.
         train_dl = PipelineConfig.make_train_dataloader(train_ds)
         if torchrun_is_running():
+            assert type(train_dl) is DistributedSampler
             train_dl.sampler.set_epoch(epoch)
 
         # Train the model.
@@ -400,7 +402,8 @@ def main(args):
                             summary_writer,
                             PipelineConfig.write_interval,
                             epoch,
-                            PipelineConfig.gradient_norm_max)
+                            PipelineConfig.gradient_norm_max,
+                            debug=True)
 
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()
@@ -410,8 +413,6 @@ def main(args):
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_val_dataloader(val_ds)
-        if torchrun_is_running():
-            val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, val_global_step,
                  rtdetrv2_model,
                  hungarian_loss_fn, loss_reducer,

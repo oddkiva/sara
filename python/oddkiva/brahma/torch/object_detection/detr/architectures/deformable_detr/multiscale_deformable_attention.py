@@ -469,8 +469,9 @@ class MultiscaleDeformableAttention(nn.Module):
                 # assert all((nm_l[i] == i).all() for i in range(N * M))
 
                 # NOTE:
-                # We enumerate all (nm, y, x) 3D-coordinates, we read a value vector of
-                # dimension d_v. That's why the value dimension is at the end.
+                # For each 3D-coordinates indexed by $(nm, y, x)$, we read a
+                # value vector of dimension $d_v$. That's why the value dimension
+                # is at the end.
                 values_sampled_l = value_map_l[nm_l, :, y_l, x_l]\
                     .permute(0, 3, 1, 2)
                 assert values_sampled_l.shape == (N * M, d_v, card_Q, K)

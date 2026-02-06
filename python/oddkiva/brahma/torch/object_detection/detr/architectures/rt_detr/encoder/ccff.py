@@ -305,7 +305,7 @@ class CCFF(torch.nn.Module):
         # Reshape the object query matrix as a feature map.
         n, _, h, w = S5.shape
         _, _, c = F5_flat.shape
-        F5 = F5_flat.permute(0, 2, 1).reshape(n, c, h, w)
+        F5 = F5_flat.permute(0, 2, 1).reshape(n, c, h, w).contiguous()
 
         F_topdown_enriched = self.fuse_topdown.forward(F5, S)
         F_bottomup_refined = self.refine_bottomup.forward(F_topdown_enriched)

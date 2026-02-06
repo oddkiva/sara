@@ -33,7 +33,7 @@ class RTDETRv2(nn.Module):
         feature_pyramid = self.backbone(x)
 
         # AIFI+CCFF
-        encoding_pyramid = self.encoder(
+        encoding_pyramid = self.encoder.forward(
             feature_pyramid[-self.pyramid_level_count:]
         )
 
