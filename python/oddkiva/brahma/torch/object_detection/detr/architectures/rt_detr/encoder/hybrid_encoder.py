@@ -41,7 +41,7 @@ class HybridEncoder(torch.nn.Module):
     ) -> list[torch.Tensor]:
         # Project the feature vectors of the feature pyramid into the same
         # dimensional space.
-        S = self.backbone_feature_proj(feature_pyramid)
+        S = self.backbone_feature_proj.forward(feature_pyramid)
         # Perform self-attention of the coarsest feature map of the feature
         # pyramid.
         # [F3, F4, F5] for ResNet

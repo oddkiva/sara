@@ -199,11 +199,11 @@ class AnchorDecoder(nn.Module):
         memory_filtered = self.decoder_base(memory_filtered)
 
         anchor_class_logits = self.class_logit_head(memory_filtered)
-        anchor_geometry_residual_logits = \
+        anchor_geometry_logit_residuals = \
             self.geometry_residual_head(memory_filtered)
 
         anchor_geometry_logits_refined = \
-            anchor_geometry_logits_refined + anchor_geometry_residual_logits
+            anchor_geometry_logits_refined + anchor_geometry_logit_residuals
 
         return (memory_filtered,
                 anchor_class_logits,

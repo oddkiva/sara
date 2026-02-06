@@ -17,7 +17,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 from oddkiva.brahma.torch.parallel.ddp import (
     get_world_size,
-    is_ddp_available_and_initialized
+    is_ddp_available_and_initialized,
+    torchrun_is_running
 )
 
 
@@ -270,7 +271,8 @@ class HungarianLossReducer(nn.Module):
 
 def compute_ddp_average_loss_dict(loss_dict: dict[str, torch.Tensor]):
     avg_loss_values = torch.stack([loss_dict[k].detach() for k in loss_dict])
-    torch.distributed.all_reduce(avg_loss_values, op=ReduceOp.AVG)
+    if torchrun_is_running():
+        torch.distributed.all_reduce(avg_loss_values, op=ReduceOp.AVG)
     return avg_loss_values
 
 

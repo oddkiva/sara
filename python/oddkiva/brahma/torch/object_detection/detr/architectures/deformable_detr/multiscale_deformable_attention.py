@@ -24,7 +24,8 @@ class MultiscaleDeformableAttention(nn.Module):
                  value_dim: int,
                  pyramid_level_count: int = 4,
                  kv_count_per_level: int = 4,
-                 sampling_offset_scale_factor: float = 0.5):
+                 sampling_offset_scale_factor: float = 0.5,
+                 use_bilinear_sampling: bool = False):
         """Constructs a multiscale deformable attention layer.
 
         Parameters:
@@ -55,6 +56,8 @@ class MultiscaleDeformableAttention(nn.Module):
                 yet another hyperparameter.
         """
         super().__init__()
+
+        self.use_bilinear_sampling = use_bilinear_sampling
 
         self.embed_dim = embed_dim
         self.value_dim = value_dim
@@ -99,10 +102,18 @@ class MultiscaleDeformableAttention(nn.Module):
         # torch.reshape(y, (N, L, H, K))
         # torch.softmax(y, dim=-1)
 
+        # Value vector projector (projects the values into a smaller vector
+        # space).
         self.value_projector = nn.Linear(
             embed_dim,
             value_dim * attention_head_count
         )
+
+        # Value backprojector (backprojects the projected values to the
+        # original vector space).
+        #
+        # This is so that we can stack several multi-scale deformable attention
+        # layers altogether.
         self.backprojector = nn.Linear(
             value_dim * attention_head_count,
             embed_dim
@@ -110,8 +121,23 @@ class MultiscaleDeformableAttention(nn.Module):
 
         self._reset_parameters()
 
+        # TODO:
+        # Don't learn the sampling offset parameters if we resort to the
+        # nearest-neighbor integral interpolation for the value sampling.
+        if not self.use_bilinear_sampling:
+            for p in self.sampling_offset_predictors.parameters():
+                p.requires_grad = False
+
     def _reset_parameters(self):
-        # Sampling offset predictor.
+        """
+        Initializes the learning parameters for the multi-scale deformable
+        attention layer.
+        """
+
+        # 1. Sampling offset predictor.
+        #
+        # We initialize the biases of the sampling offset predictor using the
+        # sine-cosine embedding.
         nn.init.constant_(self.sampling_offset_predictors.weight, 0)
         thetas = \
             torch.arange(self.attention_head_count, dtype=torch.float32) * \
@@ -130,15 +156,15 @@ class MultiscaleDeformableAttention(nn.Module):
         grid_init *= scaling
         self.sampling_offset_predictors.bias.data[...] = grid_init.flatten()
 
-        # Attention weight predictor.
+        # 2. Attention weight predictor.
         nn.init.constant_(self.attn_weight_predictors.weight, 0)
         nn.init.constant_(self.attn_weight_predictors.bias, 0)
 
-        # Value vector projector.
+        # 3. Value vector projector.
         nn.init.xavier_uniform_(self.value_projector.weight)
         nn.init.constant_(self.value_projector.bias, 0)
 
-        # Backprojector.
+        # 4. Value backprojector.
         nn.init.xavier_uniform_(self.backprojector.weight)
         nn.init.constant_(self.backprojector.bias, 0)
 
@@ -313,6 +339,14 @@ class MultiscaleDeformableAttention(nn.Module):
         value_positions: torch.Tensor,
         value_pyramid_hw_sizes: list[tuple[int, int]]
     ):
+        r"""
+        Index the list of value positions with the following indices:
+        - batch index $n \in [0, N[$
+        - attention head index $m \in [0, M[$
+        - query index $q$
+        - image pyramid level $l \in [0, L[$
+        - value sample index $k \in [0, K[$
+        """
         # Permute the axes and reshape so as to obtain the shape
         # (N * M, top_K, LK, 2)
         #
@@ -325,16 +359,19 @@ class MultiscaleDeformableAttention(nn.Module):
             .permute(0, 2, 1, 3, 4)\
             .flatten(start_dim=0, end_dim=1)
 
-        # The positions of the (key-value) pairs are normalized in the range
-        # [0, 1].
-        #
-        # Now PyTorch has the function `torch.nn.functional.grid_sample` in its
-        # API to sample the feature using bilinear interpolation, but they must
-        # be in the range [-1, 1], where:
-        # - (x=-1, y=-1) is the left-top corner of the feature map
-        # - (x=+1, y=+1) is the right-bottom corner of the feature map
-        # x_qmlk_rescaled = torch.clamp(2. * x_qmlk - 1, min = -1., max=1.)
-        x_qmlk_rescaled = 2 * x_qmlk - 1
+        if self.use_bilinear_sampling:
+            # The positions of the (key-value) pairs are normalized in the range
+            # [0, 1].
+            #
+            # Now PyTorch has the function `torch.nn.functional.grid_sample` in its
+            # API to sample the feature using bilinear interpolation, but they must
+            # be in the range [-1, 1], where:
+            # - (x=-1, y=-1) is the left-top corner of the feature map
+            # - (x=+1, y=+1) is the right-bottom corner of the feature map
+            # x_qmlk_rescaled = torch.clamp(2. * x_qmlk - 1, min = -1., max=1.)
+            x_qmlk_rescaled = 2 * x_qmlk - 1
+        else:
+            x_qmlk_rescaled = x_qmlk
 
 
         # 3. Split the list of value positions per image level.
@@ -391,12 +428,55 @@ class MultiscaleDeformableAttention(nn.Module):
         )
 
         values_per_level = []
-        for x_l, value_map_l in zip(x_per_level, value_pyramid):
+        for xy_l, value_map_l in zip(x_per_level, value_pyramid):
             # Collapse the pair of indices (attention head index, key index)
             # into a 1D index.
-            values_l = F.grid_sample(value_map_l, x_l, align_corners=False)
+            if self.use_bilinear_sampling:
+                values_sampled_l = F.grid_sample(value_map_l, xy_l,
+                                                 align_corners=False)
+            else:
+                # For each image indexed by $n \in [0, N=8[$,
+                #
+                # - $Q=410$ queries each of them indexed by $q$ are calculated
+                #   by the transformer encoder.
+                # - The transformer decoder layer is composed of $M=8$
+                #   attention head each of them indexed by $m$.
+                # - Each attention head $m$ samples $K = 4$ value vectors:
+                assert N * M == value_map_l.shape[0]
+                assert d_v == value_map_l.shape[1]
+                _, _, H, W = value_map_l.shape
+
+                # Q = number of queries per image.
+                card_Q = xy_l.shape[1]
+
+                # Rescale the [0, 1]-normalized coordinates to
+                # [0, W-1] x [0, H-1].
+                x_l = (xy_l[..., 0] * W + 0.5)\
+                    .to(torch.int64)\
+                    .clamp(min=0, max=W - 1)
+                y_l = (xy_l[..., 1] * H + 0.5)\
+                    .to(torch.int64)\
+                    .clamp(min=0, max=H - 1)
+
+                # x_l[nm, q, k] is the x-coordinates
+                # y_l[nm, q, k] is the y-coordinates
+
+                # Enumerate the (n, m) indices.
+                nm_l = torch.arange(N * M, device=value_map_l.device)\
+                    .reshape(N * M, 1, 1)\
+                    .repeat(1, card_Q, K)
+                assert nm_l.shape == (N * M, card_Q, K)
+                # assert all((nm_l[i] == i).all() for i in range(N * M))
+
+                # NOTE:
+                # We enumerate all (nm, y, x) 3D-coordinates, we read a value vector of
+                # dimension d_v. That's why the value dimension is at the end.
+                values_sampled_l = value_map_l[nm_l, :, y_l, x_l]\
+                    .permute(0, 3, 1, 2)
+                assert values_sampled_l.shape == (N * M, card_Q, K, d_v)
+
             # Shape is (N * M, d_v, top-K, K)
-            values_per_level.append(values_l)
+            values_per_level.append(values_sampled_l)
 
         # Make sure we permute the axes again to perform the attention
         # calculus.
@@ -411,7 +491,6 @@ class MultiscaleDeformableAttention(nn.Module):
             .permute(0, 3, 1, 4, 2)
             for v in values_per_level
         ]
-
 
         values = torch.cat(values_per_level, dim=3)
         assert values.shape == (N, top_K, M, L * K, d_v)

@@ -12,9 +12,11 @@ from torch.distributed import (
     ReduceOp,
     destroy_process_group
 )
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.utils.freeze import (
     freeze_batch_norm,
     freeze_parameters
@@ -32,14 +34,18 @@ from oddkiva.brahma.torch.object_detection.detr.architectures\
         RTDETRHungarianLoss,
         log_elementary_losses
     )
-from oddkiva.brahma.torch.object_detection.optim.ema import ModelEMA
+from oddkiva.brahma.torch.object_detection.optim.ema import (
+    ModelEMA,
+    deparallelize
+)
 from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
+        RTDETRv2,
         TrainTestPipelineConfig as PipelineConfig
     )
 
 
-def get_gpu_memory_usage():
+def get_cuda_memory_usage():
     result = subprocess.run(
         ['nvidia-smi',
          '--query-gpu=memory.used',
@@ -119,17 +125,27 @@ def validate(
             val_global_step += 1
 
 
-def save_model(rtdetrv2_model: torch.nn.Module,
+def save_model(model: DDP | RTDETRv2,
                epoch: int,
                step: int | None = None) -> None:
     # Save the model after each training epoch.
-    if torch.distributed.get_rank() == 0 and torchrun_is_running():
-        logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
-        assert isinstance(rtdetrv2_model,
-                          torch.nn.parallel.DistributedDataParallel)
+    logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
+    if torchrun_is_running():
         # In the case of distributed training, make sure only the node
         # associated with GPU node 0 can save the model.
-        ckpt = rtdetrv2_model.module.state_dict()
+        if torch.distributed.get_rank() != 0:
+            return
+
+        assert isinstance(model, DDP)
+        ckpt = model.module.state_dict()
+
+        torch.save(
+            ckpt,
+            PipelineConfig.out_model_filepath(epoch, step)
+        )
+    else:
+        assert isinstance(model, RTDETRv2)
+        ckpt = model.state_dict()
         torch.save(
             ckpt,
             PipelineConfig.out_model_filepath(epoch, step)
@@ -138,7 +154,7 @@ def save_model(rtdetrv2_model: torch.nn.Module,
 
 def train_for_one_epoch(
     dataloader: DataLoader,
-    gpu_id: int | None,
+    gpu_id: int | str | None,
     train_global_step: int,
     model: torch.nn.Module,
     loss_fn: RTDETRHungarianLoss,
@@ -164,11 +180,14 @@ def train_for_one_epoch(
             imgs = imgs.to(gpu_id)
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
+
         logger.info(format_msg(
             f'[E:{epoch:0>2},S:{step:0>5}] Batch size: {imgs.shape[0]}'
         ))
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'
+        ))
         targets = {
             'boxes': tgt_boxes,
             'labels': tgt_labels
@@ -181,7 +200,9 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'
+        ))
         loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
@@ -189,11 +210,17 @@ def train_for_one_epoch(
             tgt_boxes, tgt_labels
         )
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'
+        ))
         loss = loss_reducer.forward(loss_dict)
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'
+        ))
 
-        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
+        logger.info(format_msg(
+            f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'
+        ))
         loss.backward()
         if max_norm is not None:
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
@@ -203,18 +230,22 @@ def train_for_one_epoch(
         ema.update(model)
 
         if step % summary_write_interval == 0:
-            logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'))
+            logger.info(format_msg(
+                f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'
+            ))
 
             log_elementary_losses(loss_dict, writer, train_global_step)
 
             loss_value = loss.detach()
-            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+            if torchrun_is_running():
+                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
             writer.add_scalar(f'global', loss_value, train_global_step)
 
-            logger.info(format_msg((
-                f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
-                f'{get_gpu_memory_usage()}'
-            )))
+            if torch.cuda.is_available():
+                logger.info(format_msg((
+                    f'[E:{epoch:0>2},S:{step:0>5}] Memory usage:\n'
+                    f'{get_cuda_memory_usage()}'
+                )))
 
         train_global_step += 1
 
@@ -226,9 +257,10 @@ def main(args):
     # PARALLEL TRAINING
     ddp_setup()
 
+
     # --------------------------------------------------------------------------
     # THE MODEL
-    gpu_id = get_local_rank()
+    gpu_id = get_local_rank() if torchrun_is_running() else DEFAULT_DEVICE
     rtdetrv2_model = PipelineConfig.make_model()
     # Load the model weights.
     ckpt_fp = args.resume
@@ -262,10 +294,12 @@ def main(args):
         freeze_batch_norm(rtdetrv2_model.backbone)
         freeze_parameters(rtdetrv2_model.backbone.blocks[0])
 
-
     # Transfer the model to GPU memory and wrap it as a DDP model.
-    rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
-    torch.distributed.barrier()
+    if torchrun_is_running():
+        rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
+        torch.distributed.barrier()
+    else:
+        rtdetrv2_model = rtdetrv2_model.to(gpu_id)
 
 
     # --------------------------------------------------------------------------
@@ -296,6 +330,7 @@ def main(args):
         box_matcher_params=box_matcher_params
     )
 
+
     # --------------------------------------------------------------------------
     # THE COMPOUND LOSS FUNCTION
     #
@@ -312,7 +347,8 @@ def main(args):
     # THE OPTIMIZER.
     #
     # The parameter groups with specific learning parameters.
-    rtdetrv2_param_groups = rtdetrv2_model.module.group_learnable_parameters()
+    rtdetrv2_param_groups = deparallelize(rtdetrv2_model).\
+        group_learnable_parameters()
     # We learn from scratch: let's be very aggressive.
     backbone_pg = rtdetrv2_param_groups[0]
     backbone_pg['lr'] = 5e-5

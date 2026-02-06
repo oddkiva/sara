@@ -8,9 +8,8 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 def ddp_setup():
-    if not torch.cuda.is_available():
-        return
-    init_process_group(backend='nccl')
+    if torch.cuda.is_available():
+        init_process_group(backend='nccl')
 
 def get_local_rank() -> int | None:
     local_rank = os.environ.get('LOCAL_RANK')

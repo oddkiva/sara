@@ -99,8 +99,7 @@ class TrainValTestDatasetConfig:
                 shuffle=True,
                 batch_size=TrainValTestDatasetConfig.train_batch_size,
                 collate_fn=RTDETRImageCollateFunction(),
-                num_workers=TrainValTestDatasetConfig.num_workers,
-                pin_memory=True
+                pin_memory=torch.cuda.is_available()
             )
 
     @staticmethod
@@ -122,8 +121,7 @@ class TrainValTestDatasetConfig:
                 shuffle=False,
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
                 collate_fn=collate_fn,
-                num_workers=TrainValTestDatasetConfig.num_workers,
-                pin_memory=True
+                pin_memory=torch.cuda.is_available()
             )
 
     @staticmethod
