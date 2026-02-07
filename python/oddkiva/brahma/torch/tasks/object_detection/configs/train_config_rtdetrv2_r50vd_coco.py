@@ -196,6 +196,8 @@ class OptimizationConfig:
 
     ema_decay: float = 0.9999
     ema_warmup_steps: int = 2000
+    # NOTE: because I am starting to learn from scratch.
+    activate_ema: bool = False
 
     gradient_norm_max: float = 0.1
 

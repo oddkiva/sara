@@ -126,10 +126,10 @@ def train_for_one_epoch(
     summary_write_interval: int,
     epoch: int,
     max_norm: float | None,
+    activate_ema: bool = False,
     debug: bool = False,
 ) -> None:
-    if debug:
-        torch.autograd.set_detect_anomaly(True)
+    torch.autograd.set_detect_anomaly(debug)
 
     model.train()
 
@@ -187,9 +187,18 @@ def train_for_one_epoch(
         if max_norm is not None:
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
 
-        # AdamW and EMA should be used together.
+        # AdamW.
         optimizer.step()
-        ema.update(model)
+        # EMA should be used together
+        if activate_ema:
+            logger.trace(format_msg(
+                f'[E:{epoch:0>2},S:{step:0>5}] Using EMA {ema.updates}...'
+            ))
+            ema.update(model)
+        else:
+            logger.trace(format_msg(
+                f'[E:{epoch:0>2},S:{step:0>5}] NOT Using EMA...'
+            ))
 
         if step % summary_write_interval == 0:
             # NOTE:
@@ -404,6 +413,19 @@ def main(args):
         gamma=0.1
     )
 
+    # NOTE:
+    #
+    # I have become growingly skeptical with the EMA, the model parameters will
+    # evolve very slowly at the end. Which is probably why the loss keeps
+    # stagnating at some point. But I want quite aggressive updates.
+    #
+    # Probably, because RT-DETR v2 ResNet starts from a backbone trained on
+    # Objects365, you want to stabilise the model parameters quite quickly and
+    # everything should converge quite early in fact.
+    #
+    # This does not sit very well in my case because I am starting from
+    # scratch. Perhaps that's also one of the reasons why the loss does not
+    # really go down.
     ema = ModelEMA(rtdetrv2_model,
                    decay=PipelineConfig.ema_decay,
                    warmups=PipelineConfig.ema_warmup_steps)
@@ -428,7 +450,7 @@ def main(args):
             # NOTE: ensure the shuffling is different at each epoch in
             # distributed mode (cf.
             # https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.distributed.DistributedSampler)
-            assert type(train_dl.sampler) is torch.utils.data.DistributedSampler
+            assert type(train_dl.sampler) is DistributedSampler
             train_dl.sampler.set_epoch(epoch)
 
         # Train the model.
@@ -442,6 +464,7 @@ def main(args):
                             PipelineConfig.write_interval,
                             epoch,
                             PipelineConfig.gradient_norm_max,
+                            activate_ema=PipelineConfig.activate_ema,
                             debug=True)
 
         # Modulate the learning rate after each epoch.

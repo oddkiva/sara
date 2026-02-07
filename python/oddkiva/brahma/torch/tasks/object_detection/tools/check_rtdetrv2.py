@@ -55,8 +55,8 @@ class ModelConfig:
     LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 14
-    EPOCH = 7
-    STEPS = None
+    EPOCH = 8
+    STEPS = 2000
 
     @staticmethod
     def checkpoint_filepath() -> Path:
