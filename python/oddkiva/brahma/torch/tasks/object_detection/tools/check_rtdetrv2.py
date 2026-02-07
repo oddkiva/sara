@@ -1,4 +1,6 @@
-import sys
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+import argparse
 from pathlib import Path
 
 from loguru import logger
@@ -15,7 +17,6 @@ import oddkiva.sara.graphics.image_draw as image_draw
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
-from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -37,32 +38,51 @@ def optimize_repvgg_layer_for_inference(m: nn.Module):
 class ModelConfig:
     CKPT_DIRPATH = (DATA_DIR_PATH / 'trained_models' / 'rtdetrv2_r50' /
                     'train' / 'coco' / 'ckpts')
+    CKPT_RESUME_DIRPATH = (DATA_DIR_PATH / 'trained_models' / 'rtdetrv2_r50' /
+                           'train' / 'coco' / 'ckpts-resume')
     LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                        'labels.txt')
+
+    CKPT_DIRPATH.exists()
+    CKPT_RESUME_DIRPATH.exists()
+    LABELS_FILEPATH.exists()
+
     W_INFER = 640
     H_INFER = 640
+    CONFIDENCE_THRESHOLD = 0.4
 
-    RUN_ON_CPU = True
-    EPOCH = 0
-    STEPS = 4000
-    CONFIDENCE_THRESHOLD = 0.45
+    RUN_ON_CPU = False
+    LOAD_RESUME_CKPT = False
+
+    RESUME_ITER = 14
+    EPOCH = 7
+    STEPS = 9000
+
+    @staticmethod
+    def checkpoint_filepath() -> Path:
+        if ModelConfig.STEPS is None:
+            filename = 'ckpt_epoch_{ModelConfig.EPOCH}.pth'
+        else:
+            filename = 'ckpt_epoch_{}_step_{}.pth'.format(
+                ModelConfig.EPOCH,
+                ModelConfig.STEPS
+            )
+        if ModelConfig.LOAD_RESUME_CKPT:
+            filename = f'{ModelConfig.RESUME_ITER}-{filename}'
+
+        if ModelConfig.LOAD_RESUME_CKPT:
+            fp = ModelConfig.CKPT_RESUME_DIRPATH / filename
+        else:
+            fp = ModelConfig.CKPT_DIRPATH / filename
+
+        return fp
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
-        assert ModelConfig.CKPT_DIRPATH.exists()
-        assert ModelConfig.LABELS_FILEPATH.exists()
-
-        # This is by design so that we can keep training with the GPU...
         if ModelConfig.RUN_ON_CPU:
             device = torch.device('cpu')
         else:
             device = torch.device('cuda:1')
-
-        CKPT_FP = (
-            ModelConfig.CKPT_DIRPATH /
-            f'ckpt_epoch_{ModelConfig.EPOCH}_step_{ModelConfig.STEPS}.pth'
-        )
-        assert CKPT_FP.exists()
 
         # THE MODEL
         config = RTDETRConfig()
@@ -70,7 +90,9 @@ class ModelConfig:
         model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
-        ckpt = torch.load(CKPT_FP, weights_only=True, map_location=device)
+        ckpt = torch.load(ModelConfig.checkpoint_filepath(),
+                          weights_only=True,
+                          map_location=device)
         model.load_state_dict(ckpt)
 
         model = freeze_batch_norm(model)
@@ -130,7 +152,37 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
 
 
 def user_main():
-    video_file = sys.argv[1]
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        'video',
+        type=str,
+        help='video filepath'
+    )
+    parser.add_argument(
+        '-s', '--skip',
+        type=int,
+        help='Number of video frames to skip'
+    )
+    parser.add_argument(
+        '-t', '--threshold',
+        type=float,
+        help=('Detection confidece threshold '
+              f'(default: {ModelConfig.CONFIDENCE_THRESHOLD})')
+    )
+    args = parser.parse_args()
+
+    if args.video is None:
+        parser.print_usage()
+
+    video_file = args.video
+    video_frame_skip_count = \
+        args.skip if args.skip is not None else \
+        0
+    conf_thres = \
+        args.threshold if args.threshold else \
+        ModelConfig.CONFIDENCE_THRESHOLD
+
     assert Path(video_file).exists()
     video_stream = sara.VideoStream()
     video_stream.open(video_file, True)
@@ -144,9 +196,10 @@ def user_main():
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     display_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     video_frame_index = - 1
-    video_frame_skip_count = 2
 
     label_colors = generate_label_colors(len(label_names))
+
+    font = sara.make_font()
 
     while video_stream.read(video_frame):
         video_frame_index += 1
@@ -163,7 +216,7 @@ def user_main():
             print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < ModelConfig.CONFIDENCE_THRESHOLD:
+                if conf < conf_thres:
                     continue
 
                 # Draw the object box
@@ -175,13 +228,10 @@ def user_main():
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = f'{label_names[label]} {conf:0.2f}'
-                font_size = 12
-                bold = True
-
-                print(f'[{text}] ({l}, {t}, {w}, {h})')
-
-                image_draw.draw_text(display_frame, p, text, color,
-                                     font_size, 0, False, bold, False)
+                # Quick-and-dirty for a better text-background contrast
+                font_color = [63] * 3 if label % 2 == 0 else [191] * 3
+                image_draw.draw_boxed_text(display_frame, p, text, color,
+                                           font, font_color)
 
             sara.draw_image(display_frame)
 

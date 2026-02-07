@@ -8,7 +8,7 @@ import torch
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard.writer import SummaryWriter
 
 # Datasets
 import oddkiva.brahma.torch.datasets.coco as coco
@@ -48,8 +48,22 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 16
-    num_workers: int = 8
+    # NOTE:
+    #
+    # I can't get more than 5 training samples in a batch on a NVIDIA Titan X
+    # (Pascal) 12GB GPU.
+    #
+    # Unless I freeze:
+    # - the 1st convolutional blocks of the PResNet-50 backbone
+    # - the batch norm layers of the PResNet-50 backbone,
+    # I can get up to 8 samples per batch.
+    train_batch_size: int = \
+        5   if torch.cuda.is_available() else \
+        16  # on my MacBook
+    num_workers: int = \
+        5 if torch.cuda.is_available() else \
+        8 # on my Macbook
+
     val_batch_size: int = 32
 
     train_transform: v2.Transform = v2.Compose([
@@ -58,7 +72,37 @@ class TrainValTestDatasetConfig:
             rotation_range=10,
             translation_range=(0.1, 0.1),
             scaling_range=(0.5, 1.5),
-            probability=0.5,
+            # NOTE
+            #
+            # In the first epochs, I deemed necessary to feed a larger number
+            # of bounding boxes per training images, and therefore use the
+            # mosaic data transform 80% of the time.
+            #
+            # Now that we have kept training the model for about 20 cumulated
+            # epochs (because of interruptions) like that, I want to see
+            # whether by using the mosaic data transform only 50% of the time
+            # will improve the detection performance and the object
+            # classification.
+            #
+            # The reason is that while the mosaic data transform provides a
+            # larger number of bounding boxes, the cost we pay is that we lose
+            # a lot of the richer and finer textural information that
+            # characterizes every object of interest because of the pixel
+            # sampling.
+            #
+            # A visual monitoring of the training seems to show that we are
+            # able to detect a lot more smaller objects. I observe that every
+            # 1000 iterations, on the same test videos the detection of
+            # pedestrians get better and better.
+            #
+            # At some point we really need to do less mosaic data transform so
+            # the backbone learns to better represent images and therefore will
+            # aid in the classification score.
+            #
+            # probability=0.8,
+            # probability=0.5,
+            # probability=0.3,
+            probability=0.25,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,

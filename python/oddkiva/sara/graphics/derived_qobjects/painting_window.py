@@ -222,6 +222,7 @@ class PaintingWindow(QWidget):
     def set_antialiasing(self, on):
         self._antialiasing = on
 
+
 #  void PaintingWindow::drawPoly(const QPolygonF& polygon, const QColor& c,
 #                                int width)
 #  {

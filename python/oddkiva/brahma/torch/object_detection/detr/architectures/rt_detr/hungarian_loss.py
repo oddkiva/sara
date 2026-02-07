@@ -285,8 +285,9 @@ def log_elementary_losses(loss_dict: dict[str, Any],
     keys = [*loss_final.keys()]
     loss_values_f = compute_ddp_average_loss_dict(loss_final)
     # Log.
-    for k, loss_value_f in zip(keys, loss_values_f):
-        writer.add_scalar(f'final/{k}', loss_value_f, train_global_step)
+    if torchrun_is_running() and torch.distributed.get_rank() == 0:
+        for k, loss_value_f in zip(keys, loss_values_f):
+            writer.add_scalar(f'final/{k}', loss_value_f, train_global_step)
 
     # Compute the average iterated loss values across all GPUs.
     loss_iters = loss_dict['iters']
@@ -295,16 +296,18 @@ def log_elementary_losses(loss_dict: dict[str, Any],
         keys = [*loss_iters_i.keys()]
         loss_values_i = compute_ddp_average_loss_dict(loss_iters_i)
         # Log.
-        for k, loss_value_i in zip(keys, loss_values_i):
-            writer.add_scalar(f'iterated_{i}/{k}', loss_value_i, train_global_step)
+        if torchrun_is_running() and torch.distributed.get_rank() == 0:
+            for k, loss_value_i in zip(keys, loss_values_i):
+                writer.add_scalar(f'iterated_{i}/{k}', loss_value_i, train_global_step)
 
     # Compute the average anchor loss value across all GPUs.
     loss_anchors = loss_dict['init']
     keys = [*loss_anchors.keys()]
     loss_values_a = compute_ddp_average_loss_dict(loss_anchors)
     # Log.
-    for k, loss_value_a in zip(keys, loss_values_a):
-        writer.add_scalar(f'anchors/{k}', loss_value_a, train_global_step)
+    if torchrun_is_running() and torch.distributed.get_rank() == 0:
+        for k, loss_value_a in zip(keys, loss_values_a):
+            writer.add_scalar(f'anchors/{k}', loss_value_a, train_global_step)
 
     # Compute the average denoised loss value across all GPUs.
     loss_dn = loss_dict['dn']
@@ -313,5 +316,6 @@ def log_elementary_losses(loss_dict: dict[str, Any],
         keys = [*loss_dn_i.keys()]
         loss_values_dn_i = compute_ddp_average_loss_dict(loss_dn_i)
         # Log.
-        for k, loss_value_i in zip(keys, loss_values_dn_i):
-            writer.add_scalar(f'dn_{i}/{k}', loss_value_i, train_global_step)
+        if torchrun_is_running() and torch.distributed.get_rank() == 0:
+            for k, loss_value_i in zip(keys, loss_values_dn_i):
+                writer.add_scalar(f'dn_{i}/{k}', loss_value_i, train_global_step)
