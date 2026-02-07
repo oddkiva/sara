@@ -37,9 +37,8 @@ def optimize_repvgg_layer_for_inference(m: nn.Module):
 
 
 class ModelConfig:
-    # CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
-    #                  'rtdetrv2_r50vd_6x_coco_ema.pth')
-    CKPT_FILEPATH = Path('/home/david/GitHub/krousar/RT-DETR/rtdetrv2_pytorch/output/rtdetrv2_r50vd_6x_coco/last.pth')
+    CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
+                     'rtdetrv2_r50vd_6x_coco_ema.pth')
     LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                        'labels.txt')
     W_INFER = 640
@@ -150,7 +149,7 @@ def user_main():
 
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.5:
+                if conf < 0.6:
                     continue
                 # Draw the object box
                 color = label_colors[label]
@@ -160,7 +159,7 @@ def user_main():
 
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
-                text = label_names[label]
+                text = f'{label_names[label]} {conf:>0.2f}'
                 font_size = 12
                 bold = True
                 image_draw.draw_text(display_frame, p, text, color,

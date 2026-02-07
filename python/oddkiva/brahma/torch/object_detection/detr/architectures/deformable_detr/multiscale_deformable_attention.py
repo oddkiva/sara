@@ -25,7 +25,7 @@ class MultiscaleDeformableAttention(nn.Module):
                  pyramid_level_count: int = 4,
                  kv_count_per_level: int = 4,
                  sampling_offset_scale_factor: float = 0.5,
-                 use_bilinear_sampling: bool = False):
+                 use_bilinear_sampling: bool = True):
         """Constructs a multiscale deformable attention layer.
 
         Parameters:
