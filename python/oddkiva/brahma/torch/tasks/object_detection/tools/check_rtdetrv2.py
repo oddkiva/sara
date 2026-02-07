@@ -55,7 +55,7 @@ class ModelConfig:
     LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 14
-    EPOCH = 8
+    EPOCH = 1
     STEPS = 2000
 
     @staticmethod
@@ -195,7 +195,7 @@ def user_main():
 
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     display_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
-    video_frame_index = - 1
+    video_frame_index = -1
 
     label_colors = generate_label_colors(len(label_names))
     font = sara.make_font()
