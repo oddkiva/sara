@@ -56,12 +56,12 @@ class ModelConfig:
 
     RESUME_ITER = 14
     EPOCH = 7
-    STEPS = 9000
+    STEPS = None
 
     @staticmethod
     def checkpoint_filepath() -> Path:
         if ModelConfig.STEPS is None:
-            filename = 'ckpt_epoch_{ModelConfig.EPOCH}.pth'
+            filename = f'ckpt_epoch_{ModelConfig.EPOCH}.pth'
         else:
             filename = 'ckpt_epoch_{}_step_{}.pth'.format(
                 ModelConfig.EPOCH,
@@ -198,8 +198,8 @@ def user_main():
     video_frame_index = - 1
 
     label_colors = generate_label_colors(len(label_names))
-
     font = sara.make_font()
+    opacity = int(0.8 * 255)
 
     while video_stream.read(video_frame):
         video_frame_index += 1
@@ -220,7 +220,8 @@ def user_main():
                     continue
 
                 # Draw the object box
-                color = label_colors[label]
+                color = label_colors[label].tolist()
+                color.append(opacity)
                 xy = (int(l + 0.5), int(t + 0.5))
                 wh = (int(w + 0.5), int(h + 0.5))
                 image_draw.draw_rect(display_frame, xy, wh, color, 2.)
@@ -229,7 +230,8 @@ def user_main():
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = f'{label_names[label]} {conf:0.2f}'
                 # Quick-and-dirty for a better text-background contrast
-                font_color = [63] * 3 if label % 2 == 0 else [191] * 3
+                font_color = [63] * 3
+                color.append(opacity)
                 image_draw.draw_boxed_text(display_frame, p, text, color,
                                            font, font_color)
 

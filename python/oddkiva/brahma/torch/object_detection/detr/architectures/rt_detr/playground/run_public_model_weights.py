@@ -134,6 +134,8 @@ def user_main():
     video_frame_skip_count = 2
 
     label_colors = generate_label_colors(len(label_names))
+    font = sara.make_font(font_size=8)
+    opacity = int(0.75 * 255)
 
     while video_stream.read(video_frame):
         video_frame_index += 1
@@ -152,18 +154,20 @@ def user_main():
                 if conf < 0.6:
                     continue
                 # Draw the object box
-                color = label_colors[label]
+                color = label_colors[label].tolist()
+                color.append(opacity)
                 xy = (int(l + 0.5), int(t + 0.5))
                 wh = (int(w + 0.5), int(h + 0.5))
                 image_draw.draw_rect(display_frame, xy, wh, color, 2.)
 
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
-                text = f'{label_names[label]} {conf:>0.2f}'
-                font_size = 12
-                bold = True
-                image_draw.draw_text(display_frame, p, text, color,
-                                     font_size, 0, False, bold, False)
+                text = f'{label_names[label]} {conf:0.2f}'
+                # Quick-and-dirty for a better text-background contrast
+                font_color = [63] * 3
+                font_color.append(opacity)  # opacity
+                image_draw.draw_boxed_text(display_frame, p, text, color,
+                                           font, font_color)
 
             sara.draw_image(display_frame)
 
