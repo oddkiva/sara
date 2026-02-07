@@ -91,13 +91,13 @@ def save_model(model: DDP | RTDETRv2,
                epoch: int,
                step: int | None = None) -> None:
     # Save the model after each training epoch.
-    logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
     if torchrun_is_running():
         # In the case of distributed training, make sure only the node
         # associated with GPU node 0 can save the model.
         if torch.distributed.get_rank() != 0:
             return
 
+        logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
         assert isinstance(model, DDP)
         ckpt = model.module.state_dict()
 
@@ -106,6 +106,7 @@ def save_model(model: DDP | RTDETRv2,
             PipelineConfig.out_model_filepath(epoch, step)
         )
     else:
+        logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
         assert isinstance(model, RTDETRv2)
         ckpt = model.state_dict()
         torch.save(
