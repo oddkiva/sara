@@ -56,7 +56,7 @@ class ModelConfig:
 
     RESUME_ITER = 14
     EPOCH = 1
-    STEPS = 2000
+    STEPS = 8000
 
     @staticmethod
     def checkpoint_filepath() -> Path:
@@ -221,7 +221,6 @@ def user_main():
 
                 # Draw the object box
                 color = label_colors[label].tolist()
-                color.append(opacity)
                 xy = (int(l + 0.5), int(t + 0.5))
                 wh = (int(w + 0.5), int(h + 0.5))
                 image_draw.draw_rect(display_frame, xy, wh, color, 2.)
@@ -229,9 +228,12 @@ def user_main():
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = f'{label_names[label]} {conf:0.2f}'
+
                 # Quick-and-dirty for a better text-background contrast
-                font_color = [63] * 3
+                gray = 0.3 * color[0] + 0.59 * color[1] + 0.11 * color[2]
+                font_color = [255 - gray] * 3
                 color.append(opacity)
+
                 image_draw.draw_boxed_text(display_frame, p, text, color,
                                            font, font_color)
 
