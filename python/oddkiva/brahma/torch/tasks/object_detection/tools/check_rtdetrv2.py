@@ -55,8 +55,8 @@ class ModelConfig:
     LOAD_RESUME_CKPT = False
 
     RESUME_ITER = 14
-    EPOCH = 1
-    STEPS = 4000
+    EPOCH = 7
+    STEPS = 9000
 
     @staticmethod
     def checkpoint_filepath() -> Path:
@@ -164,13 +164,24 @@ def user_main():
         type=int,
         help='Number of video frames to skip'
     )
+    parser.add_argument(
+        '-t', '--threshold',
+        type=float,
+        help=('Detection confidece threshold '
+              f'(default: {ModelConfig.CONFIDENCE_THRESHOLD})')
+    )
     args = parser.parse_args()
 
     if args.video is None:
         parser.print_usage()
-    
+
     video_file = args.video
-    video_frame_skip_count = args.skip if args.skip is not None else 0
+    video_frame_skip_count = \
+        args.skip if args.skip is not None else \
+        0
+    conf_thres = \
+        args.threshold if args.threshold else \
+        ModelConfig.CONFIDENCE_THRESHOLD
 
     assert Path(video_file).exists()
     video_stream = sara.VideoStream()
@@ -205,7 +216,7 @@ def user_main():
             print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < ModelConfig.CONFIDENCE_THRESHOLD:
+                if conf < conf_thres:
                     continue
 
                 # Draw the object box
