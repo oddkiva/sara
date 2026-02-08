@@ -117,7 +117,7 @@ class DecoderConfig:
 
     # Denoising group generation parameters
     dn_box_count = 100
-    dn_label_alter_prob = 0.5
+    dn_label_alter_prob = 0.2  # 10% of the time
     dn_noise_relative_scale = 1.0
 
     @staticmethod

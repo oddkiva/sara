@@ -69,14 +69,14 @@ class TrainValTestDatasetConfig:
     train_transform: v2.Transform = v2.Compose([
         Mosaic(
             output_size=320,
-            rotation_range=10,
+            rotation_range=10,  # degrees
             translation_range=(0.1, 0.1),
             scaling_range=(0.5, 1.5),
             # NOTE
             #
-            # In the first epochs, I deemed necessary to feed a larger number
-            # of bounding boxes per training images, and therefore use the
-            # mosaic data transform 80% of the time.
+            # In the first epochs, I deemed it necessary to feed a larger
+            # number of bounding boxes per training images, and therefore use
+            # the mosaic data transform 80% of the time.
             #
             # Now that we have kept training the model for about 20 cumulated
             # epochs (because of interruptions) like that, I want to see
@@ -100,8 +100,7 @@ class TrainValTestDatasetConfig:
             # aid in the classification score.
             #
             # probability=0.8,
-            # probability=0.5,
-            probability=0.3,
+            probability=0.5,
             fill_value=0,
             use_cache=False,
             max_cached_images=50,
