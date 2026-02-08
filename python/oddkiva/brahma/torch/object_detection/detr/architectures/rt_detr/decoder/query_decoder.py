@@ -290,6 +290,10 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         attn_num_layers: int = 6,
         attn_dropout: float = 0.1,
         normalize_before: bool = False,
+        # DENOISING GROUP GENERATION PARAMS
+        dn_box_count: int = 100,
+        dn_label_alter_prob: float = 0.5,
+        dn_noise_relative_scale: float = 1.0
     ):
         super().__init__()
 
@@ -322,7 +326,12 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         )
         self.box_geometry_embedding_map = BoxGeometryEmbeddingMap(hidden_dim)
 
-        self.dn_group_gen = ContrastiveDenoisingGroupGenerator(num_classes)
+        self.dn_group_gen = ContrastiveDenoisingGroupGenerator(
+            num_classes,
+            box_count=dn_box_count,
+            box_label_alter_prob=dn_label_alter_prob,
+            box_noise_relative_scale=dn_noise_relative_scale
+        )
 
         # Auxiliary geometry estimator for each decoding iteration.
         self.box_geometry_logit_heads = nn.ModuleList(

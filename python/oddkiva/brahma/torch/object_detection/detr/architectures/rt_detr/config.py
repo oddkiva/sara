@@ -115,6 +115,11 @@ class DecoderConfig:
     attn_feedforward_dim = 1024
     normalize_before = False
 
+    # Denoising group generation parameters
+    dn_box_count = 100
+    dn_label_alter_prob = 0.5
+    dn_noise_relative_scale = 1.0
+
     @staticmethod
     def make_model() -> Model:
         C = DecoderConfig
@@ -127,7 +132,10 @@ class DecoderConfig:
             attn_num_layers=C.attn_num_layers,
             attn_dropout=C.attn_dropout,
             attn_feedforward_dim=C.attn_feedforward_dim,
-            normalize_before=C.normalize_before
+            normalize_before=C.normalize_before,
+            dn_box_count=dn_box_count,
+            dn_label_alter_prob=dn_label_alter_prob,
+            dn_noise_relative_scale=dn_noise_relative_scale
         )
 
 
