@@ -56,7 +56,7 @@ class ModelConfig:
 
     RESUME_ITER = 14
     EPOCH = 4
-    STEPS = 5000
+    STEPS = 7000
 
     @staticmethod
     def checkpoint_filepath() -> Path:

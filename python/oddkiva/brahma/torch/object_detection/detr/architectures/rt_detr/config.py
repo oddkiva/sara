@@ -133,9 +133,9 @@ class DecoderConfig:
             attn_dropout=C.attn_dropout,
             attn_feedforward_dim=C.attn_feedforward_dim,
             normalize_before=C.normalize_before,
-            dn_box_count=dn_box_count,
-            dn_label_alter_prob=dn_label_alter_prob,
-            dn_noise_relative_scale=dn_noise_relative_scale
+            dn_box_count=C.dn_box_count,
+            dn_label_alter_prob=C.dn_label_alter_prob,
+            dn_noise_relative_scale=C.dn_noise_relative_scale
         )
 
 
